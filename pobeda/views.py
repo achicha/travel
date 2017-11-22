@@ -1,4 +1,7 @@
+import datetime
+from collections import namedtuple
 from .db import DataAccessLayer, Ticket, init_db, TicketsBase
+from sqlalchemy.exc import IntegrityError
 
 
 class TicketsParser:
@@ -31,10 +34,25 @@ class TicketsParser:
     def add_new_ticket(self, ticket):
         """
             Add new ticket to Database
-        :param ticket:
+        :param ticket: (flight_from:str,flight_to:str,date:datetime)
         :return:
         """
-        return
+        #_t = namedtuple('Tick', ['flight_from', 'flight_to', 'date', 'cost'])
+        #_ticket = _t('Moscow', 'Paris', datetime.datetime.now().strftime('%d-%m-%Y'))
+        # todo fix this method
+        ticket_obj = Ticket()
+        ticket_obj.flight_from = ticket.flight_from
+        ticket_obj.flight_to = ticket.flight_to
+        ticket_obj.date = ticket.date
+        ticket_obj.cost = ticket.cost
+
+        try:
+            # print(ticket_obj)
+            self.dal.session.merge(ticket_obj)
+            self.dal.session.commit()
+        except IntegrityError:
+            pass
+        return True
 
     def remove_old_tickets(self, days=15):
         """

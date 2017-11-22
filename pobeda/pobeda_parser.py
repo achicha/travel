@@ -1,3 +1,5 @@
+import re
+from collections import namedtuple
 from datetime import datetime as dt, timedelta as td
 from grab import Grab
 
@@ -6,7 +8,8 @@ def fetch(min_price=2000, max_price=2000, aeroport_from='VKO', aeroport_to='', r
     """get all cheapest flights from pobeda.aero"""
 
     # constant parameters
-    found_flights = []
+    found_tickets = []
+    tup = namedtuple('Structure', ['flight_from', 'flight_to', 'date', 'cost'])
 
     url = 'https://www.pobeda.aero/information/book/search_cheap_tickets'
     params = {
@@ -39,19 +42,68 @@ def fetch(min_price=2000, max_price=2000, aeroport_from='VKO', aeroport_to='', r
     # find tickets
     g = Grab()
     g.go(url, post=params)
-    for i in g.doc.select('//ul[@class="airtickets"]//div[@class="airtickets-item__holder"]'):
-        found_flights.append(i.text())
+    for li in g.doc.select('//ul[@class="airtickets"]'):
+        for div in li.select('//li[@class="airtickets-item clearfix"]'):
+            # print(div.text(), div.attr('class'))
+            _from = ''
+            _to = ''
+            _date = ''
+            _cost = ''
+
+            for item in div.select('//div'):
+                if item.attr('class') == 'airtickets-cities':
+                    elem = re.split('<|>', item.html())
+                    _from = elem[2]
+                    _to = elem[4]
+                    # print(elem[2], elem[4])
+                elif item.attr('class') == 'airtickets-cost':
+                    _cost = item.text()
+                    # print(j.text())
+                elif item.attr('class') == 'airtickets-date':
+                    _date = item.text()
+                    # print(_date)
+                    # print(j.text(), '%d %B %Y')
+                    # print(tup(_from, _to, _date, _cost))
+            else:
+                found_tickets.append(tup(_from, _to, _date, _cost))
+
 
     # find return ticket if need so.
     if return_flight:
         params.update({'city_code_from': aeroport_to, 'city_code_to': aeroport_from})
         g.go(url, post=params)
-        for i in g.doc.select('//ul[@class="airtickets"]//div[@class="airtickets-item__holder"]'):
-            found_flights.append(i.text())
+        # _ticket = _t('Moscow', 'Paris', dt.now().strftime('%d-%m-%Y'))
 
-    return found_flights
+        for li in g.doc.select('//ul[@class="airtickets"]'):
+            for div in li.select('//li[@class="airtickets-item clearfix"]'):
+                # print(div.text(), div.attr('class'))
+                _from = ''
+                _to = ''
+                _date = ''
+                _cost = ''
 
-# testing
-tickets = fetch(return_flight=True)
-for t in tickets:
-    print(t)
+                for item in div.select('//div'):
+                    if item.attr('class') == 'airtickets-cities':
+                        elem = re.split('<|>', item.html())
+                        _from = elem[2]
+                        _to = elem[4]
+                        # print(elem[2], elem[4])
+                    elif item.attr('class') == 'airtickets-cost':
+                        _cost = item.text()
+                        # print(j.text())
+                    elif item.attr('class') == 'airtickets-date':
+                        _date = item.text()
+                        # print(_date)
+                        # print(j.text(), '%d %B %Y')
+                        # print(tup(_from, _to, _date, _cost))
+                else:
+                    found_tickets.append(tup(_from, _to, _date, _cost))
+    print(found_tickets)
+    return found_tickets
+
+
+if __name__ == '__main__':
+    # testing
+    tickets = fetch(return_flight=True)
+    for t in tickets:
+        print(t)
