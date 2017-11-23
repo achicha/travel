@@ -15,37 +15,37 @@ from pobeda.pobeda_parser import fetch
 def cli(debug, init):
     if debug:
         lvl = 'DEBUG'
+        echo = True
         print('debug')
     else:
         lvl = False
+        echo = False
 
     click.echo('downloading')
     # init parsers/db
     # todo change sqlite to mysql/postrgesql
-    tickets_db = TicketsParser('sqlite:///pobeda_tickets')  # ('sqlite:///:memory:')
+    tickets_db = TicketsParser('sqlite:///pobeda_tickets', echo=echo)  # ('sqlite:///:memory:')
     tickets_db.setup()
 
     # insert init data
     if init:
         tickets_db.create_db()
 
-    # # grab data
-    # found_tickets = fetch(min_price=1500, max_price=1500,
-    #                       aeroport_from='VKO', aeroport_to='', return_flight=True)
-    #
-    # for ticket in found_tickets:
-    #     tickets_db.add_new_ticket(ticket)
+    # download data
+    found_tickets = fetch(min_price=1500, max_price=1500,
+                          aeroport_from='VKO', aeroport_to='', return_flight=True)
 
-    tickets_db.add_new_ticket('qwe')
+    tickets_db.add_tickets(found_tickets)
 
-    # # parse holidays from investing
-    # investing_holidays = p.holidays_from_investing(input_date, configured_countries)
-    #
-    # if not investing_holidays:
-    #     tickets_db.teardown()
-    #     exit(0)
-    #
+    # sent to telegram
+    new_tickets = tickets_db.get_new_tickets()
+    for t in new_tickets:
+        #print(t) # todo sent msg to telegram bot here
+        tickets_db.after_sent_to_telegram(t)
 
+    tickets_db.remove_old_tickets()
+
+    # exit
     tickets_db.teardown()
     click.echo('script finished')
 

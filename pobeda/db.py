@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 class DataAccessLayer:
     """ access to DB fabric"""
 
-    def __init__(self, conn_string, base, echo=True):
+    def __init__(self, conn_string, base, echo=False):
         self.engine = None
         self.session = None
         self.conn = None
@@ -39,14 +39,16 @@ class Ticket(TicketsBase):
     flight_from = Column(String(255), nullable=False)
     flight_to = Column(String(255), nullable=False)
     date = Column(String(255), nullable=False, default=dt.now().strftime('%d-%m-%Y'))
-    cost = Column(Integer(), nullable=False)
-    update_time = Column(DateTime, nullable=False,  default=dt.now)
+    cost = Column(String(), nullable=False)
+    update_time = Column(DateTime, nullable=False,  default=dt.now, onupdate=dt.now)
     sent_to_telegram = Column(DateTime)
 
     def __repr__(self):
         return "From='{self.flight_from}', " \
                 "To='{self.flight_to}', " \
-                "Date='{self.date}'".format(self=self)
+                "Date='{self.date}'"\
+                "cost='{self.cost}'"\
+                "sent_to_telegram='{self.sent_to_telegram}'".format(self=self)
 
 
 # initial_create

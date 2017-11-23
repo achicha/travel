@@ -4,7 +4,7 @@ from datetime import datetime as dt, timedelta as td
 from grab import Grab
 
 
-def fetch(min_price=2000, max_price=2000, aeroport_from='VKO', aeroport_to='', return_flight=False):
+def fetch(min_price=800, max_price=800, aeroport_from='VKO', aeroport_to='', return_flight=False):
     """get all cheapest flights from pobeda.aero"""
 
     # constant parameters
@@ -44,12 +44,10 @@ def fetch(min_price=2000, max_price=2000, aeroport_from='VKO', aeroport_to='', r
     g.go(url, post=params)
     for li in g.doc.select('//ul[@class="airtickets"]'):
         for div in li.select('//li[@class="airtickets-item clearfix"]'):
-            # print(div.text(), div.attr('class'))
             _from = ''
             _to = ''
             _date = ''
             _cost = ''
-
             for item in div.select('//div'):
                 if item.attr('class') == 'airtickets-cities':
                     elem = re.split('<|>', item.html())
@@ -61,44 +59,30 @@ def fetch(min_price=2000, max_price=2000, aeroport_from='VKO', aeroport_to='', r
                     # print(j.text())
                 elif item.attr('class') == 'airtickets-date':
                     _date = item.text()
-                    # print(_date)
-                    # print(j.text(), '%d %B %Y')
-                    # print(tup(_from, _to, _date, _cost))
-            else:
-                found_tickets.append(tup(_from, _to, _date, _cost))
-
-
+                elif item.attr('class') == 'airtickets-buy__wrapper':
+                    found_tickets.append(tup(_from, _to, _date, _cost))
     # find return ticket if need so.
     if return_flight:
         params.update({'city_code_from': aeroport_to, 'city_code_to': aeroport_from})
         g.go(url, post=params)
-        # _ticket = _t('Moscow', 'Paris', dt.now().strftime('%d-%m-%Y'))
 
         for li in g.doc.select('//ul[@class="airtickets"]'):
             for div in li.select('//li[@class="airtickets-item clearfix"]'):
-                # print(div.text(), div.attr('class'))
                 _from = ''
                 _to = ''
                 _date = ''
                 _cost = ''
-
                 for item in div.select('//div'):
                     if item.attr('class') == 'airtickets-cities':
                         elem = re.split('<|>', item.html())
                         _from = elem[2]
                         _to = elem[4]
-                        # print(elem[2], elem[4])
                     elif item.attr('class') == 'airtickets-cost':
                         _cost = item.text()
-                        # print(j.text())
                     elif item.attr('class') == 'airtickets-date':
                         _date = item.text()
-                        # print(_date)
-                        # print(j.text(), '%d %B %Y')
-                        # print(tup(_from, _to, _date, _cost))
-                else:
-                    found_tickets.append(tup(_from, _to, _date, _cost))
-    print(found_tickets)
+                    elif item.attr('class') == 'airtickets-buy__wrapper':
+                        found_tickets.append(tup(_from, _to, _date, _cost))
     return found_tickets
 
 
