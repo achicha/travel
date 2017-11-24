@@ -44,11 +44,11 @@ class Ticket(TicketsBase):
     sent_to_telegram = Column(DateTime)
 
     def __repr__(self):
-        return "From='{self.flight_from}', " \
-                "To='{self.flight_to}', " \
-                "Date='{self.date}'"\
-                "cost='{self.cost}'"\
-                "sent_to_telegram='{self.sent_to_telegram}'".format(self=self)
+        return "{self.date} | "\
+                "{self.flight_from} -> " \
+                "{self.flight_to} " \
+                " ={self.cost}".format(self=self)
+                #"sent_to_telegram='{self.sent_to_telegram}'"
 
 
 # initial_create

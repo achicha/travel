@@ -29,17 +29,18 @@ class TicketsParser:
         """
         return self.dal.session.query(Ticket).filter_by(sent_to_telegram=None).all()
 
-    def after_sent_to_telegram(self, ticket):
-        ticket_obj = Ticket()
-        ticket_obj.flight_from = ticket.flight_from
-        ticket_obj.flight_to = ticket.flight_to
-        ticket_obj.date = ticket.date
-        ticket_obj.cost = ticket.cost
-        new_ticket = self.dal.session.query(Ticket).filter_by(flight_from=ticket_obj.flight_from,
-                                                              flight_to=ticket_obj.flight_to,
-                                                              date=ticket_obj.date,
-                                                              cost=ticket_obj.cost).first()
-        new_ticket.sent_to_telegram = dt.now()
+    def after_sent_to_telegram(self, tickets):
+        for ticket in tickets:
+            ticket_obj = Ticket()
+            ticket_obj.flight_from = ticket.flight_from
+            ticket_obj.flight_to = ticket.flight_to
+            ticket_obj.date = ticket.date
+            ticket_obj.cost = ticket.cost
+            new_ticket = self.dal.session.query(Ticket).filter_by(flight_from=ticket_obj.flight_from,
+                                                                  flight_to=ticket_obj.flight_to,
+                                                                  date=ticket_obj.date,
+                                                                  cost=ticket_obj.cost).first()
+            new_ticket.sent_to_telegram = dt.now()
         self.dal.session.commit()
 
     def add_tickets(self, tickets):

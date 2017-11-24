@@ -1,11 +1,12 @@
 #!/usr/bin/env python3.5
-
+import asyncio
 import json
 from collections import namedtuple
 from datetime import datetime as dt, timedelta as td
 import click
 from pobeda.views import TicketsParser
 from pobeda.pobeda_parser import fetch
+from telegram_bot import tele_bot
 
 
 @click.command()
@@ -32,20 +33,26 @@ def cli(debug, init):
         tickets_db.create_db()
 
     # download data
-    found_tickets = fetch(min_price=1500, max_price=1500,
+    found_tickets = fetch(min_price=1000, max_price=1000,
                           aeroport_from='VKO', aeroport_to='', return_flight=True)
 
     tickets_db.add_tickets(found_tickets)
 
     # sent to telegram
     new_tickets = tickets_db.get_new_tickets()
-    for t in new_tickets:
-        #print(t) # todo sent msg to telegram bot here
-        tickets_db.after_sent_to_telegram(t)
-
-    tickets_db.remove_old_tickets()
+    if new_tickets:
+        loop = asyncio.get_event_loop()
+        try:
+            # print(new_tickets)
+            loop.run_until_complete(tele_bot.handler(loop, new_tickets))
+        except Exception as e:
+            print('Error create server: %r' % e)
+        finally:
+            loop.close()
+            tickets_db.after_sent_to_telegram(new_tickets)
 
     # exit
+    tickets_db.remove_old_tickets()
     tickets_db.teardown()
     click.echo('script finished')
 
