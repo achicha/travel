@@ -55,7 +55,7 @@ def cli(debug=False, init=False):
     click.echo('script finished')
     print(time.time())
 
-schedule.every(10).seconds.do(cli)
+schedule.every(65).minutes.do(cli)
 
 while True:
     schedule.run_pending()
