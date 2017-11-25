@@ -19,11 +19,12 @@ register our bot in telegram:
 """
 
 import asyncio
+import json
+
 import aiohttp
 from aiohttp import web
-import json
-from telegram_bot.settings import TOKEN, CHAT_ID
 
+from settings import TOKEN, CHAT_ID
 
 API_URL = 'https://api.telegram.org/bot%s/sendMessage' % TOKEN
 

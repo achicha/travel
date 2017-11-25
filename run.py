@@ -6,6 +6,7 @@ import click
 from pobeda.views import TicketsParser
 from pobeda.pobeda_parser import fetch
 from telegram_bot import tele_bot
+from settings import DB
 
 
 @click.command()
@@ -24,7 +25,7 @@ def cli(debug, init):
     click.echo('downloading')
     # init parsers/db
     # todo change sqlite to mysql/postrgesql
-    tickets_db = TicketsParser('sqlite:///pobeda_tickets', echo=echo)  # ('sqlite:///:memory:')
+    tickets_db = TicketsParser(DB, echo=echo)  # ('sqlite:///:memory:')
     tickets_db.setup()
 
     # insert init data
