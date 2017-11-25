@@ -8,7 +8,7 @@ from telegram_bot import tele_bot
 
 import schedule
 import time
-from settings import DB
+from settings import DATABASE_URL
 
 
 def cli(debug=False, init=False):
@@ -23,7 +23,7 @@ def cli(debug=False, init=False):
     click.echo('downloading')
     # init parsers/db
     # todo change sqlite to mysql/postrgesql
-    tickets_db = TicketsParser(DB, echo=echo)  # ('sqlite:///:memory:')
+    tickets_db = TicketsParser(DATABASE_URL, echo=echo)  # ('sqlite:///:memory:')
     tickets_db.setup()
 
     # insert init data
