@@ -1,4 +1,3 @@
-#!/usr/bin/env python3.5
 import asyncio
 
 import click
@@ -7,12 +6,11 @@ from pobeda.views import TicketsParser
 from pobeda.pobeda_parser import fetch
 from telegram_bot import tele_bot
 
+import schedule
+import time
 
-@click.command()
-# @click.argument('days')
-@click.option('--debug', '-d', type=bool, is_flag=True, help='debug mode on, for testing purpose only ')
-@click.option('--init', '-i', type=bool, is_flag=True, help='init config, write data from config to DB ')
-def cli(debug, init):
+
+def cli(debug=False, init=False):
     if debug:
         lvl = 'DEBUG'
         echo = True
@@ -54,7 +52,10 @@ def cli(debug, init):
     tickets_db.remove_old_tickets()
     tickets_db.teardown()
     click.echo('script finished')
+    print(time.time())
 
+schedule.every(10).seconds.do(cli)
 
-if __name__ == "__main__":
-    cli(obj={})
+while True:
+    schedule.run_pending()
+    time.sleep(5)

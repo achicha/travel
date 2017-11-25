@@ -1,1 +1,1 @@
-parser: python run.py
+parser: python scheduler.py
