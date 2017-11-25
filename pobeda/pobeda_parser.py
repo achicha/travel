@@ -42,47 +42,46 @@ def fetch(min_price=800, max_price=800, aeroport_from='VKO', aeroport_to='', ret
     # find tickets
     g = Grab()
     g.go(url, post=params)
-    for li in g.doc.select('//ul[@class="airtickets"]'):
-        for div in li.select('//li[@class="airtickets-item clearfix"]'):
-            _from = ''
-            _to = ''
-            _date = ''
-            _cost = ''
-            for item in div.select('//div'):
-                if item.attr('class') == 'airtickets-cities':
-                    elem = re.split('<|>', item.html())
-                    _from = elem[2]
-                    _to = elem[4]
-                    # print(elem[2], elem[4])
-                elif item.attr('class') == 'airtickets-cost':
-                    _cost = item.text()
-                    # print(j.text())
-                elif item.attr('class') == 'airtickets-date':
-                    _date = item.text()
-                elif item.attr('class') == 'airtickets-buy__wrapper':
-                    found_tickets.append(tup(_from, _to, _date, _cost))
+    for li in g.doc.select('//ul[@class="airtickets"]/li[@class="airtickets-item clearfix"]'):
+        _from = ''
+        _to = ''
+        _date = ''
+        _cost = ''
+        for item in li.select('//div'):
+            if item.attr('class') == 'airtickets-cities':
+                elem = re.split('<|>', item.html())
+                _from = elem[2]
+                _to = elem[4]
+            elif item.attr('class') == 'airtickets-cost':
+                _cost = item.text()
+            elif item.attr('class') == 'airtickets-date':
+                _date = item.text()
+            elif item.attr('class') == 'airtickets-buy__wrapper':
+                found_tickets.append(tup(_from, _to, _date, _cost))
+        break
+
     # find return ticket if need so.
     if return_flight:
         params.update({'city_code_from': aeroport_to, 'city_code_to': aeroport_from})
         g.go(url, post=params)
+        for li in g.doc.select('//ul[@class="airtickets"]/li[@class="airtickets-item clearfix"]'):
+            _from = ''
+            _to = ''
+            _date = ''
+            _cost = ''
+            for item in li.select('//div'):
+                if item.attr('class') == 'airtickets-cities':
+                    elem = re.split('<|>', item.html())
+                    _from = elem[2]
+                    _to = elem[4]
+                elif item.attr('class') == 'airtickets-cost':
+                    _cost = item.text()
+                elif item.attr('class') == 'airtickets-date':
+                    _date = item.text()
+                elif item.attr('class') == 'airtickets-buy__wrapper':
+                    found_tickets.append(tup(_from, _to, _date, _cost))
+            break
 
-        for li in g.doc.select('//ul[@class="airtickets"]'):
-            for div in li.select('//li[@class="airtickets-item clearfix"]'):
-                _from = ''
-                _to = ''
-                _date = ''
-                _cost = ''
-                for item in div.select('//div'):
-                    if item.attr('class') == 'airtickets-cities':
-                        elem = re.split('<|>', item.html())
-                        _from = elem[2]
-                        _to = elem[4]
-                    elif item.attr('class') == 'airtickets-cost':
-                        _cost = item.text()
-                    elif item.attr('class') == 'airtickets-date':
-                        _date = item.text()
-                    elif item.attr('class') == 'airtickets-buy__wrapper':
-                        found_tickets.append(tup(_from, _to, _date, _cost))
     return found_tickets
 
 

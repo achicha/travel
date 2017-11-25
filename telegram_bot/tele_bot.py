@@ -22,7 +22,7 @@ import asyncio
 import aiohttp
 from aiohttp import web
 import json
-from telegram_bot.settings import my_chat_id, TOKEN
+from telegram_bot.settings import TOKEN, CHAT_ID
 
 
 API_URL = 'https://api.telegram.org/bot%s/sendMessage' % TOKEN
@@ -33,7 +33,7 @@ async def handler(loop, data):
         'Content-Type': 'application/json'
     }
     message = {
-        'chat_id': my_chat_id,
+        'chat_id': CHAT_ID,  # post messages to the public channel
         'parse_mode': 'Markdown',
         'text': '\n'.join([str(i) for i in data])
     }

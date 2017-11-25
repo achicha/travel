@@ -43,13 +43,13 @@ def cli(debug, init):
     if new_tickets:
         loop = asyncio.get_event_loop()
         try:
-            # print(new_tickets)
             loop.run_until_complete(tele_bot.handler(loop, new_tickets))
         except Exception as e:
             print('Error create server: %r' % e)
+        else:
+            tickets_db.after_sent_to_telegram(new_tickets)
         finally:
             loop.close()
-            tickets_db.after_sent_to_telegram(new_tickets)
 
     # exit
     tickets_db.remove_old_tickets()
