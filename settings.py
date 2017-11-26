@@ -1,7 +1,9 @@
 import os
+from envparse import env
 
-TOKEN = os.environ["TOKEN"]
-#CHAT_ID = os.environ["CHAT_ID"]
-DATABASE_URL = os.environ['DATABASE_URL']
-HEROKU_URL = os.environ['HEROKU_URL']
-URL_SUFFIX = os.environ['URL_SUFFIX']
+if os.path.isfile('.env'):
+    env.read_envfile('.env')
+
+DATABASE_URL = env.str('DATABASE_URL')
+HEROKU_URL = env.str('HEROKU_URL')
+URL_SUFFIX = env.str('URL_SUFFIX')
