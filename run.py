@@ -1,12 +1,10 @@
 #!/usr/bin/env python3.5
-import asyncio
-
 import click
 
 from pobeda.views import TicketsParser
 from pobeda.pobeda_parser import fetch
-from telegram_bot import tele_bot
-from settings import DATABASE_URL
+from msg_sender import send
+from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX
 
 
 @click.command()
@@ -24,7 +22,6 @@ def cli(debug, init):
 
     click.echo('downloading')
     # init parsers/db
-    # todo change sqlite to mysql/postrgesql
     tickets_db = TicketsParser(DATABASE_URL, echo=echo)  # ('sqlite:///:memory:')
     tickets_db.setup()
 
@@ -41,15 +38,12 @@ def cli(debug, init):
     # sent to telegram
     new_tickets = tickets_db.get_new_tickets()
     if new_tickets:
-        loop = asyncio.get_event_loop()
         try:
-            loop.run_until_complete(tele_bot.handler(loop, new_tickets))
+            send(HEROKU_URL + URL_SUFFIX, '\n'.join([str(ticket) for ticket in new_tickets]))
         except Exception as e:
-            print('Error create server: %r' % e)
+            print('Send to telegram error: %r' % e)
         else:
             tickets_db.after_sent_to_telegram(new_tickets)
-        finally:
-            loop.close()
 
     # exit
     tickets_db.remove_old_tickets()
