@@ -1,10 +1,12 @@
 #!/usr/bin/env python3.5
 import traceback
 from datetime import datetime as dt
+
 import click
-from pobeda.views import TicketsParser
+
+from helpers.msg_sender import send
 from pobeda.pobeda_parser import fetch
-from msg_sender import send
+from pobeda.views import TicketsParser
 from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX
 
 
@@ -24,7 +26,7 @@ def cli(debug, init):
 
     # init logger
     try:
-        from log import LogMixin
+        from helpers.log import LogMixin
         Log = LogMixin(parser_name='pobeda', level=lvl)
         logger = Log.logger
     except BaseException:
