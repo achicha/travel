@@ -1,7 +1,8 @@
-from _datetime import datetime as dt, timedelta as td
-from collections import namedtuple
-from .db import DataAccessLayer, Ticket, init_db, TicketsBase
+from datetime import datetime as dt, timedelta as td
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
+
+from helpers.db import DataAccessLayer
+from .models import Ticket, init_db, TicketsBase
 
 
 class TicketsParser:
