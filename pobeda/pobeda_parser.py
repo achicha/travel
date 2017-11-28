@@ -1,11 +1,8 @@
 from collections import namedtuple
 from datetime import datetime as dt, timedelta as td
-
-import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util import Retry
-
 from lxml import etree
+from helpers.requests_retry import requests_retry_session
+
 
 Structure = namedtuple('Structure', ['flight_from', 'flight_to', 'date', 'cost'])
 
@@ -36,34 +33,6 @@ def parse(resp_obj):
             elif item.get('class') == 'airtickets-buy__wrapper':
                 found_tickets.append(Structure(_from, _to, _date, _cost))
     return found_tickets
-
-
-def requests_retry_session(
-        retries=3,
-        backoff_factor=0.3,
-        status_forcelist=(500, 502, 504),
-        session=None,
-):
-    """
-        create session with retry
-    :param retries: total retries
-    :param backoff_factor:
-    :param status_forcelist: 5xx statuses will retry
-    :param session:
-    :return:
-    """
-    session = session or requests.Session()
-    retry = Retry(
-        total=retries,
-        read=retries,
-        connect=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=status_forcelist,
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    return session
 
 
 def fetch(min_price=800, max_price=800, aeroport_from='VKO', aeroport_to='', return_flight=False):
