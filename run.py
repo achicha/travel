@@ -53,7 +53,10 @@ def cli(debug, init):
     logger.info('total new_tickets found: {}'.format(len(new_tickets)))
     if new_tickets:
         try:
-            send(HEROKU_URL + URL_SUFFIX, '\n'.join([str(ticket) for ticket in new_tickets]))
+            if debug:
+                [print(ticket) for ticket in new_tickets]
+            else:
+                send(HEROKU_URL + URL_SUFFIX, '\n'.join([str(ticket) for ticket in new_tickets]))
         except Exception:
             logger.error('Send to telegram error: \n {}'.format(traceback.format_exc()))
         else:

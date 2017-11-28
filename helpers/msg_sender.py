@@ -1,10 +1,11 @@
 # send messages to remote REST API server
 import json
-from grab import Grab
+#from grab import Grab
+import requests
 
 
 def send(URL, msg):
-    g = Grab()
+    #g = Grab()
     headers = {
         'Content-Type': 'application/json'
     }
@@ -12,4 +13,5 @@ def send(URL, msg):
                 {'text': msg}
             }
 
-    g.go(URL, headers=headers, post=json.dumps(data))
+    requests.post(URL, headers=headers, data=json.dumps(data))
+    #g.go(URL, headers=headers, post=json.dumps(data))
