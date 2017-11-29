@@ -7,7 +7,7 @@ from helpers.requests_retry import requests_retry_session
 Structure = namedtuple('Structure', ['airport_from', 'airport_to', 'date', 'cost'])
 
 
-def parse_cheap_tickets(resp_obj):
+def cheap_tickets(resp_obj):
     """
         parse HTML
     :param resp_obj:
@@ -72,7 +72,7 @@ def fetch(min_price=800, max_price=800, aeroport_from='VKO', aeroport_to='', ret
     all_tickets = []
     try:
         resp = requests_retry_session().post(url=url, headers=headers, data=data)
-        all_tickets += parse_cheap_tickets(resp)
+        all_tickets += cheap_tickets(resp)
         # g.go(url, post=params)
     except BaseException:
         pass
@@ -80,12 +80,12 @@ def fetch(min_price=800, max_price=800, aeroport_from='VKO', aeroport_to='', ret
     if return_flight:
         data.update({'city_code_from': aeroport_to, 'city_code_to': aeroport_from})
         resp = requests_retry_session().post(url=url, headers=headers, data=data)
-        all_tickets += parse_cheap_tickets(resp)
+        all_tickets += cheap_tickets(resp)
 
     return all_tickets
 
 
-def parse_airports():
+def airports():
     url = 'https://www.pobeda.aero/SearchWidgetData.json'
     resp = requests_retry_session().get(url).json()
     return [(i,
@@ -93,24 +93,28 @@ def parse_airports():
              resp['stations'][i]['cultures']['ru']) for i in resp['stations']]  # [(code, city),]
 
 
-def parse_destinations(airport_from):
+def destinations(airport_from):
     url = 'https://www.pobeda.aero/SearchWidgetData.json'
     resp = requests_retry_session().get(url).json()
     return [i['TLC'] for i in resp['markets'][airport_from]]
 
 
+def month_tickets(airport_from, airport_to):
+    pass
+
+
 if __name__ == '__main__':
     # new cheap tickets
-    # tickets = fetch(min_price=1000, max_price=1000, return_flight=True)
-    # for t in tickets:
+    # _tickets = fetch(min_price=1000, max_price=1000, return_flight=True)
+    # for t in _tickets:
     #     print(t)
 
     # all airports
-    # airports = parse_airports()
-    # for a in airports:
+    # _airports = parse_airports()
+    # for a in _airports:
     #     print(a)
 
     # all destinations
-    destinations = parse_destinations('VKO')
-    for d in destinations:
+    _destinations = destinations('VKO')
+    for d in _destinations:
         print(d)

@@ -5,7 +5,7 @@ from datetime import datetime as dt
 import click
 
 from helpers.msg_sender import send
-from pobeda.pobeda_parser import fetch, parse_airports, parse_destinations
+from pobeda.pobeda_parser import fetch, airports, destinations
 from pobeda.views import PobedaTicketsParser
 from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX
 
@@ -45,13 +45,13 @@ def cli(hometown, debug, init, airports, city):
         tickets_db.create_db()
     # insert new found airports
     if airports:
-        found_airports = parse_airports()
+        found_airports = airports()
         tickets_db.add_new_airport(found_airports)
         logger.info('total found_airports: {}'.format(len(found_airports)))
         exit(0)
     # insert new found destinations
     if city:
-        found_destinations = parse_destinations(hometown)
+        found_destinations = destinations(hometown)
         tickets_db.add_new_destination(hometown, found_destinations)
         logger.info('total found_destinations: {}'.format(len(found_destinations)))
         exit(0)
