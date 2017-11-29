@@ -15,10 +15,8 @@ class PobedaTickets(TicketsBase):
     __table_args__ = (UniqueConstraint('airport_from', 'airport_to', 'date', name='unique_flight'),)
 
     id = Column(Integer(), primary_key=True)
-    airport_from = Column(String(255), nullable=False)
-    #airport_code_from = Column(String(255), ForeignKey('pobeda_airports.short_code'), nullable=False)
-    airport_to = Column(String(255), nullable=False)
-    #airport_code_to = Column(String(255), ForeignKey('pobeda_airports.short_code'), nullable=False)
+    airport_from = Column(String(255), ForeignKey('pobeda_airports.city_name_ru'), nullable=False)
+    airport_to = Column(String(255), ForeignKey('pobeda_airports.city_name_ru'), nullable=False)
     date = Column(String(255), nullable=False, default=dt.now().strftime('%d-%m-%Y'))
     cost = Column(String(), nullable=False)
     update_time = Column(DateTime, nullable=False,  default=dt.now, onupdate=dt.now)
