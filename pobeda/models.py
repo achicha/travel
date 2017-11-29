@@ -10,13 +10,15 @@ from sqlalchemy.exc import IntegrityError
 TicketsBase = declarative_base()
 
 
-class Ticket(TicketsBase):
-    __tablename__ = 'ticket'
-    __table_args__ = (UniqueConstraint('flight_from', 'flight_to', 'date', name='unique_flight'),)
+class PobedaTickets(TicketsBase):
+    __tablename__ = 'pobeda_tickets'
+    __table_args__ = (UniqueConstraint('airport_from', 'airport_to', 'date', name='unique_flight'),)
 
     id = Column(Integer(), primary_key=True)
-    flight_from = Column(String(255), nullable=False)
-    flight_to = Column(String(255), nullable=False)
+    airport_from = Column(String(255), nullable=False)
+    #airport_code_from = Column(String(255), ForeignKey('pobeda_airports.short_code'), nullable=False)
+    airport_to = Column(String(255), nullable=False)
+    #airport_code_to = Column(String(255), ForeignKey('pobeda_airports.short_code'), nullable=False)
     date = Column(String(255), nullable=False, default=dt.now().strftime('%d-%m-%Y'))
     cost = Column(String(), nullable=False)
     update_time = Column(DateTime, nullable=False,  default=dt.now, onupdate=dt.now)
@@ -24,10 +26,31 @@ class Ticket(TicketsBase):
 
     def __repr__(self):
         return "{self.date} | "\
-                "{self.flight_from} -> " \
-                "{self.flight_to} " \
+                "{self.airport_from} -> " \
+                "{self.airport_to} " \
                 " ={self.cost}".format(self=self)
                 #"sent_to_telegram='{self.sent_to_telegram}'"
+
+
+class PobedaDestination(TicketsBase):
+    __tablename__ = 'pobeda_destination'
+    __table_args__ = (UniqueConstraint('airport_code_from', 'airport_code_to', name='unique_destination'),)
+
+    id = Column(Integer(), primary_key=True)
+    airport_code_from = Column(String(255), ForeignKey('pobeda_airports.short_code'), nullable=False)
+    airport_code_to = Column(String(255), ForeignKey('pobeda_airports.short_code'), nullable=False)
+    update_time = Column(DateTime, nullable=False,  default=dt.now, onupdate=dt.now)
+
+
+class PobedaAirports(TicketsBase):
+    __tablename__ = 'pobeda_airports'
+    __table_args__ = (UniqueConstraint('short_code', 'city_name_en', name='unique_airports'),)
+
+    id = Column(Integer(), primary_key=True)
+    short_code = Column(String(255), nullable=False)
+    city_name_en = Column(String(255), nullable=False)
+    city_name_ru = Column(String(255), nullable=False)
+    update_time = Column(DateTime, nullable=False,  default=dt.now, onupdate=dt.now)
 
 
 # initial_create
@@ -43,7 +66,7 @@ def init_db(session):
 
     # try to insert data, maybe they are already exist
     try:
-        session.bulk_insert_mappings(Ticket,
+        session.bulk_insert_mappings(PobedaTickets,
                                      [
                                          # create comprehension
                                          dict(

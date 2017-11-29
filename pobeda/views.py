@@ -2,10 +2,10 @@ from datetime import datetime as dt, timedelta as td
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 from helpers.db import DataAccessLayer
-from .models import Ticket, init_db, TicketsBase
+from .models import PobedaTickets, init_db, TicketsBase, PobedaAirports, PobedaDestination
 
 
-class TicketsParser:
+class PobedaTicketsParser:
     def __init__(self, conn_string, base=TicketsBase, echo=False):
         self.dal = DataAccessLayer(conn_string, base, echo=echo)
 
@@ -28,40 +28,41 @@ class TicketsParser:
             Return newly added tickets from Database.
         :return: newly added ticket from DB.
         """
-        return self.dal.session.query(Ticket).filter_by(sent_to_telegram=None).all()
+        return self.dal.session.query(PobedaTickets).filter_by(sent_to_telegram=None).all()
 
     def after_sent_to_telegram(self, tickets):
         for ticket in tickets:
-            ticket_obj = Ticket()
-            ticket_obj.flight_from = ticket.flight_from
-            ticket_obj.flight_to = ticket.flight_to
+            ticket_obj = PobedaTickets()
+            ticket_obj.airport_from = ticket.airport_from
+            ticket_obj.airport_to = ticket.airport_to
             ticket_obj.date = ticket.date
             ticket_obj.cost = ticket.cost
-            new_ticket = self.dal.session.query(Ticket).filter_by(flight_from=ticket_obj.flight_from,
-                                                                  flight_to=ticket_obj.flight_to,
-                                                                  date=ticket_obj.date,
-                                                                  cost=ticket_obj.cost).first()
+            new_ticket = self.dal.session.query(PobedaTickets).filter_by(airport_from=ticket_obj.airport_from,
+                                                                         airport_to=ticket_obj.airport_to,
+                                                                         date=ticket_obj.date,
+                                                                         cost=ticket_obj.cost).first()
             new_ticket.sent_to_telegram = dt.now()
         self.dal.session.commit()
 
     def add_tickets(self, tickets):
         """
             Add new ticket to Database
-        :param ticket: [(flight_from:str,flight_to:str,date:datetime),]:list
+        :param tickets: [(airport_from:str,airport_to:str,date:datetime),]:list
         :return:
         """
-        # Structure = namedtuple('Tick', ['flight_from', 'flight_to', 'date', 'cost'])
-        # _ticket = Structure(flight_from='Москва (Внуково)', flight_to='Владикавказ', date='15 янв 2018', cost='1 499руб')
+        # Structure = namedtuple('Tick', ['airport_from', 'airport_to', 'date', 'cost'])
+        # _ticket = Structure(airport_from='Москва (Внуково)', airport_to='Владикавказ', date='15 янв 2018', cost='1 499руб')
 
         for ticket in tickets:
-            ticket_obj = Ticket()
-            ticket_obj.flight_from = ticket.flight_from
-            ticket_obj.flight_to = ticket.flight_to
+            ticket_obj = PobedaTickets()
+            ticket_obj.airport_from = ticket.airport_from
+            ticket_obj.airport_to = ticket.airport_to
             ticket_obj.date = ticket.date
             ticket_obj.cost = ticket.cost
-            if self.dal.session.query(Ticket).filter_by(flight_from=ticket_obj.flight_from,
-                                                        flight_to=ticket_obj.flight_to,
-                                                        date=ticket_obj.date).count() < 1:
+
+            if self.dal.session.query(PobedaTickets).filter_by(airport_from=ticket_obj.airport_from,
+                                                               airport_to=ticket_obj.airport_to,
+                                                               date=ticket_obj.date).count() < 1:
                 try:
                     self.dal.session.add(ticket_obj)
                 except IntegrityError:
@@ -78,8 +79,58 @@ class TicketsParser:
         :param days: number of days
         :return: True/False
         """
-        results = self.dal.session.query(Ticket).filter(Ticket.sent_to_telegram < dt.now() - td(days))
+        results = self.dal.session.query(PobedaTickets).filter(PobedaTickets.sent_to_telegram < dt.now() - td(days))
         results.delete()
         self.dal.session.commit()
 
+        return True
+
+    def add_new_airport(self, airports: list()):
+        """
+            find all airports where Pobeda is flight to
+        :param: airports: [(code, city_en, city_ru),]
+        :return:
+        """
+        for airport in airports:
+            airport_obj = PobedaAirports()
+            airport_obj.short_code = airport[0]
+            airport_obj.city_name_en = airport[1]
+            airport_obj.city_name_ru = airport[2]
+
+            if self.dal.session.query(PobedaAirports) \
+                    .filter_by(city_name_en=airport_obj.city_name_en,
+                               short_code=airport_obj.short_code).count() < 1:
+                try:
+                    self.dal.session.add(airport_obj)
+                except IntegrityError:
+                    continue
+                except InvalidRequestError:  # UNIQUE constraint failed
+                    continue
+                else:
+                    self.dal.session.commit()
+        return True
+
+    def add_new_destination(self, home_town, destinations: list()):
+        """
+            add all relationships between home town and destination city
+        :param home_town: departure city
+        :param destinations: city's list
+        :return:
+        """
+        for destination in destinations:
+            city_obj = PobedaDestination()
+            city_obj.airport_code_from = home_town
+            city_obj.airport_code_to = destination
+
+            if self.dal.session.query(PobedaDestination) \
+                    .filter_by(airport_code_from=city_obj.airport_code_from,
+                               airport_code_to=city_obj.airport_code_to).count() < 1:
+                try:
+                    self.dal.session.add(city_obj)
+                except IntegrityError:
+                    continue
+                except InvalidRequestError:  # UNIQUE constraint failed
+                    continue
+                else:
+                    self.dal.session.commit()
         return True

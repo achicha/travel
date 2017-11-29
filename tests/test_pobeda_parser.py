@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 from pobeda.pobeda_parser import fetch, Structure
-from pobeda.views import TicketsParser
+from pobeda.views import PobedaTicketsParser
 import pytest
 
 
@@ -9,7 +9,7 @@ class TestPobeda:
 
     def test_fetch(self):
         # init db
-        tickets_db = TicketsParser('sqlite:///:memory:', echo=False)
+        tickets_db = PobedaTicketsParser('sqlite:///:memory:', echo=False)
         tickets_db.setup()
 
         # fetch

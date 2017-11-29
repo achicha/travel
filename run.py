@@ -5,16 +5,18 @@ from datetime import datetime as dt
 import click
 
 from helpers.msg_sender import send
-from pobeda.pobeda_parser import fetch
-from pobeda.views import TicketsParser
+from pobeda.pobeda_parser import fetch, parse_airports, parse_destinations
+from pobeda.views import PobedaTicketsParser
 from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX
 
 
 @click.command()
-# @click.argument('days')
+@click.argument('home')
 @click.option('--debug', '-d', type=bool, is_flag=True, help='debug mode on, for testing purpose only ')
 @click.option('--init', '-i', type=bool, is_flag=True, help='init config, write data from config to DB ')
-def cli(debug, init):
+@click.option('--airports', '-a', type=bool, is_flag=True, help='add all airports to DB')
+@click.option('--city', '-c', type=bool, is_flag=True, help='add all destinations (city) to DB')
+def cli(home, debug, init, airports, city):
     click.echo('start')
     if debug:
         lvl = 'DEBUG'
@@ -34,17 +36,28 @@ def cli(debug, init):
         logger = logging.getLogger()
 
     # init parsers/db
-    tickets_db = TicketsParser(DATABASE_URL, echo=echo)  # ('sqlite:///:memory:')
+    tickets_db = PobedaTicketsParser(DATABASE_URL, echo=False)  # ('sqlite:///:memory:')
     tickets_db.setup()
     logger.debug('ticket_db set up successful')
 
     # insert init data
     if init:
         tickets_db.create_db()
+    # insert new found airports
+    if airports:
+        found_airports = parse_airports()
+        tickets_db.add_new_airport(found_airports)
+        logger.info('total found_airports: {}'.format(len(found_airports)))
+        exit(0)
+    # insert new found destinations
+    if city:
+        found_destinations = parse_destinations(home)
+        tickets_db.add_new_destination(home, found_destinations)
+        exit(0)
 
     # download data
     found_tickets = fetch(min_price=1000, max_price=1000,
-                          aeroport_from='VKO', aeroport_to='', return_flight=True)
+                          aeroport_from=home, aeroport_to='', return_flight=True)
     tickets_db.add_tickets(found_tickets)
     logger.info('total found_tickets: {}'.format(len(found_tickets)))
 
