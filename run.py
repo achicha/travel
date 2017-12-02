@@ -13,10 +13,8 @@ from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX
 @click.command()
 @click.argument('hometown')
 @click.option('--debug', '-d', type=bool, is_flag=True, help='debug mode on, for testing purpose only ')
-@click.option('--init', '-i', type=bool, is_flag=True, help='init config, write data from config to DB ')
-@click.option('--air', '-a', type=bool, is_flag=True, help='add all airports to DB')
-@click.option('--flight', '-f', type=bool, is_flag=True, help='add all destinations (flight end point) to DB')
-def cli(hometown, debug, init, air, flight):
+@click.option('--init', '-i', type=bool, is_flag=True, help='add airports and flights to DB ')
+def cli(hometown, debug, init):
     click.echo('start')
     if debug:
         lvl = 'DEBUG'
@@ -42,15 +40,11 @@ def cli(hometown, debug, init, air, flight):
 
     # insert init data
     if init:
-        tickets_db.create_db()
-    # insert new found airports
-    if air:
+        # insert new found airports
         found_airports = airports()
         tickets_db.add_new_airport(found_airports)
         logger.info('total found_airports: {}'.format(len(found_airports)))
-        exit(0)
-    # insert new found destinations
-    if flight:
+        # insert new found destinations
         found_destinations = destinations(hometown)
         tickets_db.add_new_destination(hometown, found_destinations)
         logger.info('total found_destinations: {}'.format(len(found_destinations)))
