@@ -10,3 +10,4 @@ if os.path.isfile(os.path.join(path, '.env')):
 DATABASE_URL = env.str('DATABASE_CON') + os.path.join(path, env.str('DATABASE_NAME'))
 HEROKU_URL = env.str('HEROKU_URL')
 URL_SUFFIX = env.str('URL_SUFFIX')
+WEBDRIVER_PATH = env.str('WEBDRIVER_PATH')

@@ -11,9 +11,10 @@ url = "https://pypi.python.org/simple"
 
 [packages]
 
-SQLAlchemy = "*"
+sqlalchemy = "*"
 click = "*"
 "psycopg2" = "*"
 envparse = "*"
 pytest = "*"
 requests = "*"
+selenium = "*"

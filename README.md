@@ -11,3 +11,4 @@ todo:
 - sentry logs
 - grab -> requests
 - if connection filed parse several times more.
+- [Selenium ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads) 
