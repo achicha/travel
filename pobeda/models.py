@@ -17,10 +17,11 @@ class PobedaTickets(TicketsBase):
     id = Column(Integer(), primary_key=True)
     airport_from = Column(String(255), ForeignKey('pobeda_airports.city_name_ru'), nullable=False)
     airport_to = Column(String(255), ForeignKey('pobeda_airports.city_name_ru'), nullable=False)
-    date = Column(String(255), nullable=False, default=dt.now().strftime('%d-%m-%Y'))
+    date = Column(DateTime(), nullable=False)
     cost = Column(String(), nullable=False)
-    update_time = Column(DateTime, nullable=False,  default=dt.now, onupdate=dt.now)
-    sent_to_telegram = Column(DateTime)
+    update_time = Column(DateTime(), nullable=False,  default=dt.now, onupdate=dt.now)
+    sent_to_telegram = Column(DateTime())
+    # todo: test datetime format in date
 
     def __repr__(self):
         return "{self.date} | "\

@@ -28,6 +28,7 @@ class PobedaTicketsParser:
             Return newly added tickets from Database.
         :return: newly added ticket from DB.
         """
+        # todo price filter
         return self.dal.session.query(PobedaTickets).filter_by(sent_to_telegram=None).all()
 
     def after_sent_to_telegram(self, tickets):
@@ -109,6 +110,13 @@ class PobedaTicketsParser:
                 else:
                     self.dal.session.commit()
         return True
+
+    def get_all_destinations(self, hometown):
+        """
+            Return all destinations from hometown.
+        :return:
+        """
+        return self.dal.session.query(PobedaDestination.airport_code_to).filter_by(airport_code_from=hometown).all()
 
     def add_new_destination(self, home_town, destinations: list()):
         """

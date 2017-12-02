@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
-
+# todo: remove this depricated file
 def page_parser(page_source):
     html_parser = etree.HTMLParser(encoding="utf-8")
     tree = etree.HTML(page_source, parser=html_parser)

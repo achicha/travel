@@ -5,9 +5,9 @@ from datetime import datetime as dt
 import click
 
 from helpers.msg_sender import send
-from pobeda.pobeda_parser import fetch, airports, destinations
+from pobeda.pobeda_parser import fetch, airports, destinations, run_webdriver
 from pobeda.views import PobedaTicketsParser
-from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX
+from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX, WEBDRIVER_PATH
 
 
 @click.command()
@@ -51,14 +51,30 @@ def cli(hometown, debug, init):
         exit(0)
 
     # download data
-    found_tickets = fetch(min_price=1000, max_price=1000,
-                          aeroport_from=hometown, aeroport_to='', return_flight=True)
-    tickets_db.add_tickets(found_tickets)
+    # todo: add separate method for discounts page
+    # found_tickets = fetch(min_price=1000, max_price=1000,
+    #                       aeroport_from=hometown, aeroport_to='', return_flight=True)
+    # tickets_db.add_tickets(found_tickets)
+    # logger.info('total found_tickets: {}'.format(len(found_tickets)))
+
+    # find all destination from hometown
+    # todo: test new features
+    routes = tickets_db.get_all_destinations(hometown)
+
+    # download all tickets
+    found_tickets = []
+    for route in routes:
+        found_tickets += run_webdriver(WEBDRIVER_PATH, hometown, route)
     logger.info('total found_tickets: {}'.format(len(found_tickets)))
 
-    # sent to telegram
+    # put all tickets to DB
+    tickets_db.add_tickets(found_tickets)
+
+    # new low price tickets
     new_tickets = tickets_db.get_new_tickets()
     logger.info('total new_tickets found: {}'.format(len(new_tickets)))
+
+    # sent new tickets to telegram
     if new_tickets:
         try:
             if debug:
