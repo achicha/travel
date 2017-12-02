@@ -1,13 +1,21 @@
 from collections import namedtuple
 from datetime import datetime as dt, timedelta as td
+from time import sleep
 from lxml import etree
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+
 from helpers.requests_retry import requests_retry_session
 
 
 Structure = namedtuple('Structure', ['airport_from', 'airport_to', 'date', 'cost'])
 
 
-def cheap_tickets(resp_obj):
+def _cheap_tickets(resp_obj):
     """
         parse HTML
     :param resp_obj:
@@ -72,7 +80,7 @@ def fetch(min_price=800, max_price=800, aeroport_from='VKO', aeroport_to='', ret
     all_tickets = []
     try:
         resp = requests_retry_session().post(url=url, headers=headers, data=data)
-        all_tickets += cheap_tickets(resp)
+        all_tickets += _cheap_tickets(resp)
         # g.go(url, post=params)
     except BaseException:
         pass
@@ -80,7 +88,7 @@ def fetch(min_price=800, max_price=800, aeroport_from='VKO', aeroport_to='', ret
     if return_flight:
         data.update({'city_code_from': aeroport_to, 'city_code_to': aeroport_from})
         resp = requests_retry_session().post(url=url, headers=headers, data=data)
-        all_tickets += cheap_tickets(resp)
+        all_tickets += _cheap_tickets(resp)
 
     return all_tickets
 
@@ -98,9 +106,108 @@ def destinations(airport_from):
     resp = requests_retry_session().get(url).json()
     return [i['TLC'] for i in resp['markets'][airport_from]]
 
+# month parser with selenium -------------------------------------------------
 
-def month_tickets(airport_from, airport_to):
-    pass
+
+def _month_parser(page_source):
+    # Structure = namedtuple('Structure', ['airport_from', 'airport_to', 'date', 'cost'])
+    found_tickets = []
+    html_parser = etree.HTMLParser(encoding="utf-8")
+    tree = etree.HTML(page_source, parser=html_parser)
+    # city
+    _from = ''
+    _to = ''
+    for item in tree.xpath('//div[@class="path"]'):
+        elem = list(item.itertext())
+        _from = elem[0]
+        _to = elem[1]
+        #print(_from, ' | ', _to)
+
+    # tickets
+    prev_date = ''
+    for item in tree.xpath('//ul/li/div'):
+        if item.attrib['data-type'] == 'dayMonth':
+            elem = list(item.itertext())
+            date = dt.strptime(item.attrib['data-date'], '%Y-%m-%d')
+            if prev_date == '' or prev_date < date:
+                prev_date = date
+                price = elem[5].replace('\xa0', '').strip()
+                if price.endswith('руб.'):
+                    #print(date, price)
+                    found_tickets.append(Structure(_from, _to, date, price[:-4]))
+            else:
+                break
+    return found_tickets
+
+
+def run_webdriver(webdriver_path, city_from, city_to):
+    #### settings
+    found_tickets = []
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    #chrome_options.binary_location = '/usr/bin/google-chrome-stable'
+    driver = webdriver.Chrome(executable_path=webdriver_path,
+                              chrome_options=chrome_options)
+    wait = WebDriverWait(driver, 10)
+    driver.get('https://booking.pobeda.aero/ScheduleSelect.aspx')
+
+    #### parsing
+    # fill in flights form and go to the tickets page
+    one_way_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="newSearchWidget"]/div[1]/div[2]/label'))
+    step21 = wait.until(one_way_elem, 'one_way form is not found')
+    step21.click()
+    #print('one_way')
+
+    airport_from_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="nameDepartureStation"]'))
+    step22 = wait.until(airport_from_elem, 'airport_from form is not found')
+    step22.clear()
+    step22.send_keys(city_from)
+    #print('airport_from')
+
+    airport_to_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="newSearchWidget"]/div[1]/div[4]/div[2]/input'))
+    step23 = wait.until(airport_to_elem, 'airport_to form is not found')
+    step23.clear()
+    step23.send_keys(city_to)
+    #print('airport_to')
+
+    find_button_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="searchButton"]'))
+    step24 = wait.until(find_button_elem, 'find_button_elem is not found')
+    step24.click()
+    #print('click find')
+
+    # find tickets for next 4 months
+    month_calendar_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="selectMainBody"]/div[5]/div[2]'))
+    step31 = wait.until(month_calendar_elem, 'month calendar is not found')
+    step31.click()
+    sleep(2)
+    #print('1st month')
+    found_tickets += _month_parser(driver.page_source)
+
+    second_month_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="carouselMonthContainer1"]/div/div[2]/div/a[2]'))
+    step34 = wait.until(second_month_elem, 'next month is not found')
+    step34.click()
+    sleep(2)
+    #print('2nd month')
+    found_tickets += _month_parser(driver.page_source)
+
+    third_month_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="carouselMonthContainer1"]/div/div[2]/div/a[2]'))
+    step35 = wait.until(third_month_elem, 'next month is not found')
+    step35.click()
+    sleep(2)
+    #print('3rd month')
+    found_tickets += _month_parser(driver.page_source)
+
+    forth_month_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="carouselMonthContainer1"]/div/div[2]/div/a[2]'))
+    step36 = wait.until(forth_month_elem, 'next month is not found')
+    step36.click()
+    sleep(2)
+    #print('4th month')
+    found_tickets += _month_parser(driver.page_source)
+
+    # close driver
+    driver.close()
+
+    return found_tickets
 
 
 if __name__ == '__main__':
@@ -115,6 +222,12 @@ if __name__ == '__main__':
     #     print(a)
 
     # all destinations
-    _destinations = destinations('VKO')
-    for d in _destinations:
-        print(d)
+    # _destinations = destinations('VKO')
+    # for d in _destinations:
+    #     print(d)
+
+    path = '/home/achicha/PyProjects/Github/travel/helpers/chromedriver'
+    tickets = run_webdriver(path, 'Милан', 'Москва')
+    for t in tickets:
+        print(t)
+
