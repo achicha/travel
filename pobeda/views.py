@@ -29,7 +29,6 @@ class PobedaTicketsParser:
             Return newly added tickets from Database.
         :return: newly added ticket from DB.
         """
-        # todo price filter
         return self.dal.session.query(PobedaTickets) \
             .filter(and_(PobedaTickets.sent_to_telegram == None, PobedaTickets.cost < min_price)).all()
 
@@ -82,7 +81,7 @@ class PobedaTicketsParser:
         :param days: number of days
         :return: True/False
         """
-        results = self.dal.session.query(PobedaTickets).filter(PobedaTickets.sent_to_telegram < dt.now() - td(days))
+        results = self.dal.session.query(PobedaTickets).filter(PobedaTickets.update_time < dt.now() - td(days))
         results.delete()
         self.dal.session.commit()
 
@@ -118,7 +117,6 @@ class PobedaTicketsParser:
             Return all destinations from hometown.
         :return:
         """
-        # todo: join country names
         return self.dal.session.query(PobedaAirports.city_name_ru) \
             .join(PobedaDestination, PobedaAirports.short_code == PobedaDestination.airport_code_to) \
             .filter(PobedaDestination.airport_code_from == hometown).all()

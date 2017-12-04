@@ -65,7 +65,7 @@ def cli(city_from, city_to, price,  debug, init):
     # download all tickets
     found_tickets = []
     hometown_city = tickets_db.get_city_name(city_from)[0]
-    for route in routes[:1]:
+    for route in routes:
         found_tickets += run_webdriver(WEBDRIVER_PATH, hometown_city, route[0])
     logger.info('total found_tickets: {}'.format(len(found_tickets)))
 

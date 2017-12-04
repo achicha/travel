@@ -22,8 +22,6 @@ class PobedaTickets(TicketsBase):
     update_time = Column(DateTime(), nullable=False, default=dt.now, onupdate=dt.now)
     sent_to_telegram = Column(DateTime())
 
-    # todo: test datetime format in date
-
     def __repr__(self):
         return "{} | {} -> {} ={}".format(dt.strftime(self.date, '%d-%m-%Y'),
                                           self.airport_from,
