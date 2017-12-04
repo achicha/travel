@@ -147,7 +147,7 @@ def run_webdriver(webdriver_path, city_from, city_to):
     print(city_from,' -> ', city_to)
     found_tickets = []
     chrome_options = Options()
-    #chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
     #chrome_options.binary_location = '/usr/bin/google-chrome-stable'
     driver = webdriver.Chrome(executable_path=webdriver_path,
                               chrome_options=chrome_options)
