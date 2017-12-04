@@ -1,5 +1,6 @@
 from datetime import datetime as dt, timedelta as td
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from sqlalchemy import and_
 
 from helpers.db import DataAccessLayer
 from .models import PobedaTickets, init_db, TicketsBase, PobedaAirports, PobedaDestination
@@ -23,13 +24,14 @@ class PobedaTicketsParser:
         """
         init_db(self.dal.session)
 
-    def get_new_tickets(self):
+    def get_new_tickets(self, min_price):
         """
             Return newly added tickets from Database.
         :return: newly added ticket from DB.
         """
         # todo price filter
-        return self.dal.session.query(PobedaTickets).filter_by(sent_to_telegram=None).all()
+        return self.dal.session.query(PobedaTickets) \
+            .filter(and_(PobedaTickets.sent_to_telegram == None, PobedaTickets.cost < min_price)).all()
 
     def after_sent_to_telegram(self, tickets):
         for ticket in tickets:
@@ -116,7 +118,19 @@ class PobedaTicketsParser:
             Return all destinations from hometown.
         :return:
         """
-        return self.dal.session.query(PobedaDestination.airport_code_to).filter_by(airport_code_from=hometown).all()
+        # todo: join country names
+        return self.dal.session.query(PobedaAirports.city_name_ru) \
+            .join(PobedaDestination, PobedaAirports.short_code == PobedaDestination.airport_code_to) \
+            .filter(PobedaDestination.airport_code_from == hometown).all()
+
+    def get_city_name(self, airport_short_code):
+        """
+            VKO -> Moscow
+        :param airport_short_code:
+        :return:
+        """
+        return self.dal.session.query(PobedaAirports.city_name_ru) \
+            .filter(PobedaAirports.short_code == airport_short_code).first()
 
     def add_new_destination(self, home_town, destinations: list()):
         """

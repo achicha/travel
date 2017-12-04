@@ -18,17 +18,19 @@ class PobedaTickets(TicketsBase):
     airport_from = Column(String(255), ForeignKey('pobeda_airports.city_name_ru'), nullable=False)
     airport_to = Column(String(255), ForeignKey('pobeda_airports.city_name_ru'), nullable=False)
     date = Column(DateTime(), nullable=False)
-    cost = Column(String(), nullable=False)
-    update_time = Column(DateTime(), nullable=False,  default=dt.now, onupdate=dt.now)
+    cost = Column(Integer(), nullable=False)
+    update_time = Column(DateTime(), nullable=False, default=dt.now, onupdate=dt.now)
     sent_to_telegram = Column(DateTime())
+
     # todo: test datetime format in date
 
     def __repr__(self):
-        return "{self.date} | "\
-                "{self.airport_from} -> " \
-                "{self.airport_to} " \
-                " ={self.cost}".format(self=self)
-                #"sent_to_telegram='{self.sent_to_telegram}'"
+        return "{} | {} -> {} ={}".format(dt.strftime(self.date, '%d-%m-%Y'),
+                                          self.airport_from,
+                                          self.airport_to,
+                                          self.cost
+                                          )
+        # "sent_to_telegram='{self.sent_to_telegram}'"
 
 
 class PobedaDestination(TicketsBase):
@@ -38,7 +40,7 @@ class PobedaDestination(TicketsBase):
     id = Column(Integer(), primary_key=True)
     airport_code_from = Column(String(255), ForeignKey('pobeda_airports.short_code'), nullable=False)
     airport_code_to = Column(String(255), ForeignKey('pobeda_airports.short_code'), nullable=False)
-    update_time = Column(DateTime, nullable=False,  default=dt.now, onupdate=dt.now)
+    update_time = Column(DateTime, nullable=False, default=dt.now, onupdate=dt.now)
 
 
 class PobedaAirports(TicketsBase):
@@ -49,12 +51,11 @@ class PobedaAirports(TicketsBase):
     short_code = Column(String(255), nullable=False)
     city_name_en = Column(String(255), nullable=False)
     city_name_ru = Column(String(255), nullable=False)
-    update_time = Column(DateTime, nullable=False,  default=dt.now, onupdate=dt.now)
+    update_time = Column(DateTime, nullable=False, default=dt.now, onupdate=dt.now)
 
 
 # initial_create
 def init_db(session):
-
     # test dataset
     tickets = [
         ('Москва (Внуково)', 'Екатеринбург', dt.strptime('11-05-2017', '%d-%m-%Y')),

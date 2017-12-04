@@ -134,7 +134,7 @@ def _month_parser(page_source):
                 price = elem[5].replace('\xa0', '').strip()
                 if price.endswith('руб.'):
                     #print(date, price)
-                    found_tickets.append(Structure(_from, _to, date, price[:-4]))
+                    found_tickets.append(Structure(_from, _to, date, int(price[:-4])))
             else:
                 break
     return found_tickets
