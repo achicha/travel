@@ -141,7 +141,9 @@ def _month_parser(page_source):
 
 
 def run_webdriver(webdriver_path, city_from, city_to):
+    # todo: better logging
     #### settings
+    print(city_from,' -> ', city_to)
     found_tickets = []
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -156,52 +158,52 @@ def run_webdriver(webdriver_path, city_from, city_to):
     one_way_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="newSearchWidget"]/div[1]/div[2]/label'))
     step21 = wait.until(one_way_elem, 'one_way form is not found')
     step21.click()
-    #print('one_way')
+    print('one_way')
 
     airport_from_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="nameDepartureStation"]'))
     step22 = wait.until(airport_from_elem, 'airport_from form is not found')
     step22.clear()
     step22.send_keys(city_from)
-    #print('airport_from')
+    print('airport_from')
 
     airport_to_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="newSearchWidget"]/div[1]/div[4]/div[2]/input'))
     step23 = wait.until(airport_to_elem, 'airport_to form is not found')
     step23.clear()
     step23.send_keys(city_to)
-    #print('airport_to')
+    print('airport_to')
 
     find_button_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="searchButton"]'))
     step24 = wait.until(find_button_elem, 'find_button_elem is not found')
     step24.click()
-    #print('click find')
+    print('click find')
 
     # find tickets for next 4 months
     month_calendar_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="selectMainBody"]/div[5]/div[2]'))
     step31 = wait.until(month_calendar_elem, 'month calendar is not found')
     step31.click()
     sleep(2)
-    #print('1st month')
+    print('1st month')
     found_tickets += _month_parser(driver.page_source)
 
     second_month_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="carouselMonthContainer1"]/div/div[2]/div/a[2]'))
     step34 = wait.until(second_month_elem, 'next month is not found')
     step34.click()
     sleep(2)
-    #print('2nd month')
+    print('2nd month')
     found_tickets += _month_parser(driver.page_source)
 
     third_month_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="carouselMonthContainer1"]/div/div[2]/div/a[2]'))
     step35 = wait.until(third_month_elem, 'next month is not found')
     step35.click()
     sleep(2)
-    #print('3rd month')
+    print('3rd month')
     found_tickets += _month_parser(driver.page_source)
 
     forth_month_elem = EC.presence_of_element_located((By.XPATH, '//*[@id="carouselMonthContainer1"]/div/div[2]/div/a[2]'))
     step36 = wait.until(forth_month_elem, 'next month is not found')
     step36.click()
     sleep(2)
-    #print('4th month')
+    print('4th month')
     found_tickets += _month_parser(driver.page_source)
 
     # close driver
