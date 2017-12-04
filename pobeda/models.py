@@ -35,6 +35,7 @@ class PobedaDestination(TicketsBase):
     __tablename__ = 'pobeda_destination'
     __table_args__ = (UniqueConstraint('airport_code_from', 'airport_code_to', name='unique_destination'),)
 
+    # todo: route add time, and last update tickets time
     id = Column(Integer(), primary_key=True)
     airport_code_from = Column(String(255), ForeignKey('pobeda_airports.short_code'), nullable=False)
     airport_code_to = Column(String(255), ForeignKey('pobeda_airports.short_code'), nullable=False)

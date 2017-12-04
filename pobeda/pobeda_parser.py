@@ -183,7 +183,6 @@ def run_webdriver(webdriver_path, city_from, city_to):
     #step24.sendKeys(Keys.Enter)
     step23.clear()
     step24.click()
-    # todo: this step was skipped
     print('find_tickets button')
 
     # find tickets for next 4 months

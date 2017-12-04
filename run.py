@@ -59,6 +59,7 @@ def cli(city_from, city_to, price,  debug, init):
     # tickets_db.add_tickets(found_tickets)
     # logger.info('total found_tickets: {}'.format(len(found_tickets)))
 
+    # todo: city_to if we do not need all tickets. city_to should be a list [city1, city2..]
     # find all destination from hometown
     routes = tickets_db.get_all_destinations(city_from)
 
