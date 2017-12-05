@@ -112,14 +112,24 @@ class PobedaTicketsParser:
                     self.dal.session.commit()
         return True
 
-    def get_all_destinations(self, hometown):
+    def get_all_destinations(self, city_from, cities_to=None):
         """
             Return all destinations from hometown.
         :return:
         """
-        return self.dal.session.query(PobedaAirports.city_name_ru) \
-            .join(PobedaDestination, PobedaAirports.short_code == PobedaDestination.airport_code_to) \
-            .filter(PobedaDestination.airport_code_from == hometown).all()
+        routes = []
+        if not cities_to:
+            routes = [i[0] for i in self.dal.session.query(PobedaAirports.city_name_ru) \
+                .join(PobedaDestination, PobedaAirports.short_code == PobedaDestination.airport_code_to) \
+                .filter(PobedaDestination.airport_code_from == city_from).all()]
+        else:
+            for city in cities_to:
+                routes += [i[0] for i in self.dal.session \
+                    .query(PobedaAirports.city_name_ru) \
+                    .join(PobedaDestination, PobedaAirports.short_code == PobedaDestination.airport_code_to) \
+                    .filter(and_(PobedaDestination.airport_code_from == city_from,
+                                 PobedaDestination.airport_code_to == city)).all()]
+        return routes
 
     def get_city_name(self, airport_short_code):
         """
@@ -128,7 +138,7 @@ class PobedaTicketsParser:
         :return:
         """
         return self.dal.session.query(PobedaAirports.city_name_ru) \
-            .filter(PobedaAirports.short_code == airport_short_code).first()
+            .filter(PobedaAirports.short_code == airport_short_code).first()[0]
 
     def add_new_destination(self, home_town, destinations: list()):
         """

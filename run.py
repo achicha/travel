@@ -12,7 +12,7 @@ from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX, WEBDRIVER_PATH
 
 @click.command()
 @click.argument('city_from')
-@click.option('--city_to', '-c', type=str, help='destination town, if None than search for all cities')
+@click.option('--city_to', '-c', type=str, help='string with comma separator: t1,t2,t3 with destination towns, if None than search for all cities')
 @click.option('--price', '-p', type=int, default=1000, help='maximum ticket price')
 @click.option('--debug', '-d', type=bool, is_flag=True, help='debug mode on, for testing purpose only ')
 @click.option('--init', '-i', type=bool, is_flag=True, help='add airports and flights to DB ')
@@ -50,30 +50,42 @@ def cli(city_from, city_to, price,  debug, init):
         found_destinations = destinations(city_from)
         tickets_db.add_new_destination(city_from, found_destinations)
         logger.info('total found_destinations: {}'.format(len(found_destinations)))
+        print('done')
         exit(0)
 
     # download data
-    # todo: add separate method for discounts page
-    # found_tickets = fetch(min_price=1000, max_price=1000,
-    #                       aeroport_from=city_from, aeroport_to='', return_flight=True)
-    # tickets_db.add_tickets(found_tickets)
-    # logger.info('total found_tickets: {}'.format(len(found_tickets)))
+    if city_to:
+        cities_to = city_to.split(',')
+        # find destination from hometown to these cities_to
+        routes = tickets_db.get_all_destinations(city_from, cities_to)
 
-    # todo: city_to if we do not need all tickets. city_to should be a list [city1, city2..]
-    # find all destination from hometown
-    routes = tickets_db.get_all_destinations(city_from)
+        # download all tickets
+        hometown_city = tickets_db.get_city_name(city_from)
+        for route in routes:
+            route_tickets = run_webdriver(WEBDRIVER_PATH, hometown_city, route)
+            if route_tickets:
+                tickets_db.add_tickets(route_tickets)  # add found tickets to DB
+                logger.info('tickets={}, city_to={}'.format(len(route_tickets), route))
 
-    # download all tickets
-    hometown_city = tickets_db.get_city_name(city_from)[0]
-    for route in routes:
-        route_tickets = run_webdriver(WEBDRIVER_PATH, hometown_city, route[0])
-        if route_tickets:
-            tickets_db.add_tickets(route_tickets)  # add found tickets to DB
-            logger.info('tickets={}, city_to={}'.format(len(route_tickets), route))
+        # new low price tickets
+        new_tickets = tickets_db.get_new_tickets(price)
+        logger.info('total new_tickets found: {}'.format(len(new_tickets)))
 
-    # new low price tickets
-    new_tickets = tickets_db.get_new_tickets(price)
-    logger.info('total new_tickets found: {}'.format(len(new_tickets)))
+    else:
+        # find all destination from hometown
+        routes = tickets_db.get_all_destinations(city_from)
+
+        # download all tickets
+        hometown_city = tickets_db.get_city_name(city_from)
+        for route in routes:
+            route_tickets = run_webdriver(WEBDRIVER_PATH, hometown_city, route)
+            if route_tickets:
+                tickets_db.add_tickets(route_tickets)  # add found tickets to DB
+                logger.info('tickets={}, city_to={}'.format(len(route_tickets), route))
+
+        # new low price tickets
+        new_tickets = tickets_db.get_new_tickets(price)
+        logger.info('total new_tickets found: {}'.format(len(new_tickets)))
 
     # sent new tickets to telegram
     if new_tickets:
