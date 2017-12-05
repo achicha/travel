@@ -63,6 +63,7 @@ def cli(city_from, city_to, price,  debug, init):
         hometown_city = tickets_db.get_city_name(city_from)
         for route in routes:
             route_tickets = run_webdriver(WEBDRIVER_PATH, hometown_city, route)
+            route_tickets += run_webdriver(WEBDRIVER_PATH, route, hometown_city)  # return ticket
             if route_tickets:
                 tickets_db.add_tickets(route_tickets)  # add found tickets to DB
                 logger.info('tickets={}, city_to={}'.format(len(route_tickets), route))
