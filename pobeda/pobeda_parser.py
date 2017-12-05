@@ -219,6 +219,45 @@ def run_webdriver(webdriver_path, city_from, city_to):
     return found_tickets
 
 
+def month_trips():
+    # todo: how/where to get this cookie? need to build good userSearchConfiguration row
+    from grab import Grab
+    g = Grab()
+    url = 'https://booking.pobeda.aero/AjaxMonthLowFareAvailaibility.aspx'
+    headers = {'Cookie': 'ASP.NET_SessionId=21ct5f2osvv5y2bv1ixw3n1f; \
+               CultureCode=%7b%22Value%22%3a%22ru-RU%22%7d; \
+               skysales=!Nnf0/LJnRyPnqRB26j6ok5cv2bHz0cdeINHGmEqHIJBCFRJfwAK5n253Fan5AJd7uagOX1WR3QCitE8=; \
+               PassengersInfoCookie=%7b%22Value%22%3a%22%22%7d; \
+               dtSa=-; \
+               userSearchConfiguration=%7B%22From%22%3A%22VKO%22%2C%22InboundDate%22%3A%222017-12-11%22%2C%22To%22%3A%22SGC%22%2C%22OutboundDate%22%3A%222017-12-08%22%2C%22MinADT%22%3A0%2C%22MinCHD%22%3A0%2C%22MinINFT%22%3A0%2C%22SelectedADT%22%3A%221%22%2C%22SelectedCHD%22%3A%220%22%2C%22SelectedINFT%22%3A%220%22%2C%22MaxPax%22%3A0%2C%22TripType%22%3A%22RoundTrip%22%2C%22LinkBooking%22%3Anull%2C%22MinDepartureDate%22%3Anull%2C%22MaxDepartureDate%22%3Anull%2C%22MinArrivalDate%22%3Anull%2C%22MaxArrivalDate%22%3Anull%2C%22Culture%22%3A%22ru%22%2C%22CurrencyCode%22%3A%22RUB%22%2C%22Success%22%3Atrue%2C%22AnyFieldWithData%22%3Afalse%7D; \
+               dtPC=3$496961232_348h-vCRDIHUPXBDJPBHJGJILFKIAEOODOHLHSOQ; \
+               dtCookie=3$2B3EAF72CD66D7CD233F16EA2C693C8A|RUM+Default+Application|1; \
+               rxVisitor=1511890404724BSGLKFH5U7NNCUC0MQG38QMSEJ0S3PV1; \
+               rxvt=1512498768913|1512496961238; \
+               dtLatC=2; \
+               sessionControl=%7B%22ownership%22%3A%7B%22sessionOwnerId%22%3A%22213d9100-e07d-85d5-8342-7bab90906705%22%2C%22sessionOwnerPage%22%3A%22https%3A%2F%2Fbooking.pobeda.aero%2FScheduleSelect.aspx%22%2C%22lastUpdated%22%3A1512497216699%7D%7D'
+
+        , 'Origin': 'https://booking.pobeda.aero'
+        , 'Accept-Encoding': 'gzip, deflate, br'
+        , 'Accept-Language': 'en-US,en;q=0.9,ru;q=0.8'
+        , 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'
+        , 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        , 'Accept': '*/*'
+        , 'Referer': 'https://booking.pobeda.aero/ScheduleSelect.aspx'
+        , 'X-Requested-With': 'XMLHttpRequest'
+        , 'Connection': 'keep-alive'
+               }
+    data = 'indexTrip=1&dateSelected=2017-12-08'
+
+    g.go(url, headers=headers)  # , get=data)
+    g.doc.cookies.items()
+    """
+    [('ASP.NET_SessionId', 'epbjyktiryhop10k3djznz4y'),
+     ('CultureCode', '%7b%22Value%22%3a%22ru-RU%22%7d'),
+     ('skysales','!WZvl5L969mTSUEF26j6ok5cv2bHz0fPZY2mzH98Nv46Li49EuXw/waLGKP/x74Qlh1ra4dWDFITIElI='),
+     ('dtCookie', '3$EC06CA9214B85E48260003E96FA25E3D|RUM+Default+Application|1')]
+    """
+
 if __name__ == '__main__':
     # new cheap tickets
     # _tickets = fetch(min_price=1000, max_price=1000, return_flight=True)
