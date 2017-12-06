@@ -12,7 +12,7 @@ TicketsBase = declarative_base()
 
 class PobedaTickets(TicketsBase):
     __tablename__ = 'pobeda_tickets'
-    __table_args__ = (UniqueConstraint('airport_from', 'airport_to', 'date', name='unique_flight'),)
+    __table_args__ = (UniqueConstraint('airport_from', 'airport_to', 'date', 'cost', name='unique_flight'),)
 
     id = Column(Integer(), primary_key=True)
     airport_from = Column(String(255), ForeignKey('pobeda_airports.city_name_ru'), nullable=False)

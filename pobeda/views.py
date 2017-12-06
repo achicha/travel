@@ -75,7 +75,7 @@ class PobedaTicketsParser:
                     self.dal.session.commit()
         return True
 
-    def remove_old_tickets(self, days=30):
+    def remove_old_tickets(self, days=15):
         """
             Remove update_time for old tickets (maybe they will be available again)
         :param days: number of days
