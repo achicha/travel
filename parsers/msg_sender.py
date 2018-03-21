@@ -1,6 +1,7 @@
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
+import json
 
 
 def requests_retry_session(
@@ -29,3 +30,15 @@ def requests_retry_session(
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     return session
+
+
+def send(URL, msg):
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    data = {'message':
+                {'text': msg}
+            }
+    jdata = json.dumps(data)
+    requests.post(URL, headers=headers, data=jdata)
+

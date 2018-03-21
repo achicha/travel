@@ -25,9 +25,9 @@ class Tickets(CBase):
     update_time = Column(DateTime(), nullable=False, default=dt.now, onupdate=dt.now)
     sent_to_telegram = Column(DateTime())
 
-    # def __repr__(self):
-    #     return "{} from {} -> to {} ={}rub".format(dt.strftime(self.date, '%d-%m-%Y'),
-    #                                                self.origin_airport,
-    #                                                self.destination_airport,
-    #                                                self.price
-    #                                                )
+    def __str__(self):
+        return "{} from {} -> to {} ={}rub".format(dt.strftime(self.date, '%d-%m-%Y'),
+                                                   self.origin_airport,
+                                                   self.destination_airport,
+                                                   self.price
+                                                   )

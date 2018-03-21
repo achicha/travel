@@ -1,7 +1,7 @@
 from collections import namedtuple
 from datetime import datetime as dt, timedelta as td
 from parsers.base import BaseParser
-from parsers.requests_retry import requests_retry_session
+from parsers.msg_sender import requests_retry_session
 
 
 class AviaSalesParser(BaseParser):

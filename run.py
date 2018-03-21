@@ -1,7 +1,11 @@
+import traceback
 from datetime import datetime as dt, timedelta as td
 import click
 from parsers.aviasales import AviaSalesParser
+from parsers.msg_sender import send
 from database.views import DBConnector
+from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX
+
 
 # set default help options
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -19,12 +23,14 @@ def cli(ctx, debug):
         dt.strftime(dt.utcfromtimestamp(int(dt.now().timestamp())), '%Y-%m-%d %H:%M:%S')
     ))
 
+    # debug mode
     if debug:
         print('debug: mode on')
     else:
         pass
+
     # init parsers/db
-    tickets_db = DBConnector('sqlite:///:memory:', echo=False)  # ('sqlite:///:memory:') or DATABASE_URL
+    tickets_db = DBConnector(DATABASE_URL, echo=False)  # ('sqlite:///:memory:') or DATABASE_URL
     tickets_db.setup()
     print('ticket_db set up successful')
 
@@ -65,6 +71,21 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
     if tickets:
         ctx.obj['DB_instance'].add_tickets(tickets)
 
+    # send new tickets to Telegram channel
+    new_tickets = ctx.obj['DB_instance'].get_new_tickets(price)
+
+    if new_tickets:
+        try:
+            if ctx.obj['DEBUG']:
+                [print(ticket) for ticket in new_tickets]
+            else:
+                # todo check telegram sending
+                send(HEROKU_URL + URL_SUFFIX, '\n'.join([str(ticket) for ticket in new_tickets]))
+        except Exception:
+            print('Send to telegram error: \n {}'.format(traceback.format_exc()))
+        else:
+            ctx.obj['DB_instance'].after_sent_to_telegram(new_tickets)
+
     # exit
     ctx.obj['DB_instance'].remove_old_tickets()
     ctx.obj['DB_instance'].teardown()
@@ -75,5 +96,3 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
 
 if __name__ == "__main__":
     cli(obj={})
-
-# [{'value': 5140.0, 'return_date': None, 'number_of_changes': 0, 'gate': 'Pobeda', 'depart_date': '2018-05-03'}, {'value': 5140.0, 'return_date': None, 'number_of_changes': 0, 'gate': 'Pobeda', 'depart_date': '2018-04-28'}]
