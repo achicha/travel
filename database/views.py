@@ -25,7 +25,12 @@ class DBConnector:
         return self.dal.session.query(Tickets) \
             .filter(and_(Tickets.sent_to_telegram == None, Tickets.price < min_price)).all()
 
-    def after_sent_to_telegram(self, tickets):
+    def update_telegram_status(self, tickets):
+        """
+        After message was sent to Telegram, need to update sent_to_telegram field in DB
+        :param tickets:
+        :return:
+        """
         for ticket in tickets:
             new_ticket = self.dal.session.query(Tickets) \
                 .filter_by(origin_airport=ticket.origin_airport,

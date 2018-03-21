@@ -10,3 +10,16 @@ if os.path.isfile(os.path.join(path, '.env')):
 DATABASE_URL = env.str('DATABASE_CON') + os.path.join(path, env.str('DATABASE_NAME'))
 HEROKU_URL = env.str('HEROKU_URL')
 URL_SUFFIX = env.str('URL_SUFFIX')
+
+DESTINATIONS = [
+    {
+        'origin_airport': 'EVN',
+        'destination_airport': 'MOW',
+        'price': 5500
+    },
+    {
+        'origin_airport': 'LWN',
+        'destination_airport': 'MOW',
+        'price': 5500
+    }
+]

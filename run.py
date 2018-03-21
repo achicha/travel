@@ -84,7 +84,7 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
         except Exception:
             print('Send to telegram error: \n {}'.format(traceback.format_exc()))
         else:
-            ctx.obj['DB_instance'].after_sent_to_telegram(new_tickets)
+            ctx.obj['DB_instance'].update_telegram_status(new_tickets)
 
     # exit
     ctx.obj['DB_instance'].remove_old_tickets()

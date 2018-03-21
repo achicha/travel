@@ -49,7 +49,7 @@ class TestDatabase:
         assert tickets[0].origin_airport.strip() == 'MOW'
 
         # update telegram status
-        self.db.set_telegram_status_after_update(tickets)
+        self.db.update_telegram_status(tickets)
         assert isinstance(tickets[0].sent_to_telegram, dt)
 
     def test_add_tickets(self):
