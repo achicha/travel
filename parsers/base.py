@@ -20,13 +20,7 @@ class BaseParser(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _parse_data(self, response, price):
-        """
-        Get data from response
-        :param response: response
-        :param price: maximum ticket price for filtering out
-        :return: data
-        """
+    def _parse_data(self, *args):
         pass
 
     def get_data(self, origin_airport, destination_airport, depart_start, depart_end, price):
@@ -43,7 +37,7 @@ class BaseParser(metaclass=ABCMeta):
         url = self._create_url(origin_airport, destination_airport, depart_start, depart_end)
         resp = self._fetch(url)
         if resp.status_code == 200:
-            data = self._parse_data(resp, price)
+            data = self._parse_data(resp, origin_airport, destination_airport, price)
             return data
         else:
             return 'reason: {}, code: {}'.format(resp.reason, resp.status_code)

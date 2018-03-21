@@ -1,6 +1,7 @@
 from datetime import datetime as dt, timedelta as td
 import click
 from parsers.aviasales import AviaSalesParser
+from database.views import DBConnector
 
 # set default help options
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -14,16 +15,22 @@ def cli(ctx, debug):
     """Travel parsers. examples: \n
     aviasales -from LWN -to MOW -s 2018-04-28 -e 2018-05-03 -p 5200 \n
     """
-    click.echo('start')
+    print('start at {} UTC'.format(
+        dt.strftime(dt.utcfromtimestamp(int(dt.now().timestamp())), '%Y-%m-%d %H:%M:%S')
+    ))
 
     if debug:
         print('debug: mode on')
     else:
         pass
+    # init parsers/db
+    tickets_db = DBConnector('sqlite:///:memory:', echo=False)  # ('sqlite:///:memory:') or DATABASE_URL
+    tickets_db.setup()
+    print('ticket_db set up successful')
 
     # share group values between commands
     ctx.obj['DEBUG'] = debug or False
-    print(ctx.obj['DEBUG'])
+    ctx.obj['DB_instance'] = tickets_db
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
@@ -40,19 +47,33 @@ def cli(ctx, debug):
 def aviasales(ctx, origin_airport, destination_airport, start, end, price):
     """Aviasales parser"""
 
+    # download tickets
     try:
+        print('aviasales parser starts')
         a = AviaSalesParser()
-        data = a.get_data(origin_airport=origin_airport,
-                          destination_airport=destination_airport,
-                          depart_start=start,
-                          depart_end=end,
-                          price=price)
+        tickets = a.get_data(origin_airport=origin_airport,
+                             destination_airport=destination_airport,
+                             depart_start=start,
+                             depart_end=end,
+                             price=price)
+        print('collected tickets:', len(tickets))
 
-        print(data)
     except Exception as e:
         print(e)
+
+    # add tickets to DB
+    if tickets:
+        ctx.obj['DB_instance'].add_tickets(tickets)
+
+    # exit
+    ctx.obj['DB_instance'].remove_old_tickets()
+    ctx.obj['DB_instance'].teardown()
+    print('finish at {} UTC'.format(
+        dt.strftime(dt.utcfromtimestamp(int(dt.now().timestamp())), '%Y-%m-%d %H:%M:%S')
+    ))
 
 
 if __name__ == "__main__":
     cli(obj={})
 
+# [{'value': 5140.0, 'return_date': None, 'number_of_changes': 0, 'gate': 'Pobeda', 'depart_date': '2018-05-03'}, {'value': 5140.0, 'return_date': None, 'number_of_changes': 0, 'gate': 'Pobeda', 'depart_date': '2018-04-28'}]

@@ -1,3 +1,4 @@
+from collections import namedtuple
 from datetime import datetime as dt, timedelta as td
 from parsers.base import BaseParser
 from parsers.requests_retry import requests_retry_session
@@ -26,9 +27,26 @@ class AviaSalesParser(BaseParser):
         resp = requests_retry_session().get(url=url, headers=_headers)
         return resp
 
-    def _parse_data(self, response, price):
+    def _parse_data(self, response, origin_airport, destination_airport, price):
+        """
+           Get data from response
+        :param response: response
+        :param origin_airport:
+        :param destination_airport:
+        :param price: maximum ticket price for filtering out
+        :return: data
+        """
+        # {'value': 5140.0, 'return_date': None, 'number_of_changes': 0, 'gate': 'Pobeda', 'depart_date': '2018-04-23'}
         resp = response.json()
-        return sorted([i for i in resp['prices'] if int(i['value']) <= price], key=lambda x: x['value'])
+        # filtered out by price
+        filtered_by_price = sorted([i for i in resp['prices'] if int(i['value']) <= price],
+                                   key=lambda x: x['value'])
+        # add airports
+        [i.update({'origin_airport': origin_airport,
+                   'destination_airport': destination_airport}) for i in filtered_by_price]
+        return filtered_by_price
+        # all
+        # return sorted(resp['prices'], key=lambda x: x['value'])
 
 
 if __name__ == '__main__':
