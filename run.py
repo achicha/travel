@@ -79,7 +79,6 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
             if ctx.obj['DEBUG']:
                 [print(ticket) for ticket in new_tickets]
             else:
-                # todo check telegram sending
                 send(url=HEROKU_URL + TRAVEL_ROUTE,
                      chat_id=CHAT_ID,
                      msg='\n'.join([str(ticket) for ticket in new_tickets]))
