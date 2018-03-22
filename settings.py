@@ -9,7 +9,7 @@ if os.path.isfile(os.path.join(path, '.env')):
 
 DATABASE_URL = env.str('DATABASE_CON') + os.path.join(path, env.str('DATABASE_NAME'))
 HEROKU_URL = env.str('HEROKU_URL')
-URL_SUFFIX = env.str('URL_SUFFIX')
+TRAVEL_ROUTE = env.str('TRAVEL_ROUTE')
 CHAT_ID = env.int('CHAT_ID')
 
 DESTINATIONS = [
