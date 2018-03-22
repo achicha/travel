@@ -4,7 +4,7 @@ import click
 from parsers.aviasales import AviaSalesParser
 from parsers.msg_sender import send
 from database.views import DBConnector
-from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX
+from settings import DATABASE_URL, HEROKU_URL, URL_SUFFIX, CHAT_ID
 
 
 # set default help options
@@ -80,7 +80,9 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
                 [print(ticket) for ticket in new_tickets]
             else:
                 # todo check telegram sending
-                send(HEROKU_URL + URL_SUFFIX, '\n'.join([str(ticket) for ticket in new_tickets]))
+                send(url=HEROKU_URL + URL_SUFFIX,
+                     chat_id=CHAT_ID,
+                     msg='\n'.join([str(ticket) for ticket in new_tickets]))
         except Exception:
             print('Send to telegram error: \n {}'.format(traceback.format_exc()))
         else:
@@ -92,6 +94,7 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
     print('finish at {} UTC'.format(
         dt.strftime(dt.utcfromtimestamp(int(dt.now().timestamp())), '%Y-%m-%d %H:%M:%S')
     ))
+    print('===============================')
 
 
 if __name__ == "__main__":

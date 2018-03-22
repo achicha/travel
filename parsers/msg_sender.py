@@ -32,13 +32,21 @@ def requests_retry_session(
     return session
 
 
-def send(URL, msg):
+def send(url, chat_id, msg):
+    """
+     send message to remote host
+    :param URL: https://my_instance_name.herokuapp.com/my_api_version
+    :param chat_id: telegram chat_id or @channel_id
+    :param msg: text
+    :return:
+    """
     headers = {
         'Content-Type': 'application/json'
     }
     data = {'message':
-                {'text': msg}
+                {'from': {'id': chat_id},
+                 'text': msg}
             }
     jdata = json.dumps(data)
-    requests.post(URL, headers=headers, data=jdata)
+    requests.post(url, headers=headers, data=jdata)
 
