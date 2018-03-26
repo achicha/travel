@@ -1,9 +1,9 @@
 from datetime import datetime as dt, timedelta as td
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
-from sqlalchemy import and_
+from sqlalchemy import and_, desc
 
 from database.db_connector import DataAccessLayer
-from database.models import Tickets, CBase
+from database.models import CBase, Tickets, Airports
 
 
 class DBConnector:
@@ -23,7 +23,7 @@ class DBConnector:
         :return: newly added ticket from DB.
         """
         return self.dal.session.query(Tickets) \
-            .filter(and_(Tickets.sent_to_telegram == None, Tickets.price < min_price)).all()
+            .filter(and_(Tickets.sent_to_telegram == None, Tickets.price < min_price)).order_by(Tickets.price).all()
 
     def update_telegram_status(self, tickets):
         """
@@ -37,7 +37,8 @@ class DBConnector:
                            destination_airport=ticket.destination_airport,
                            date=ticket.date,
                            price=ticket.price,
-                           number_of_changes=ticket.number_of_changes).first()
+                           number_of_changes=ticket.number_of_changes,
+                           resource=ticket.resource).first()
             if new_ticket:
                 new_ticket.sent_to_telegram = dt.now()
                 self.dal.session.commit()
@@ -58,14 +59,16 @@ class DBConnector:
                                  date=dt.strptime(ticket['depart_date'], '%Y-%m-%d'),
                                  price=ticket['value'],
                                  number_of_changes=ticket['number_of_changes'],
-                                 gate=ticket['gate'])
+                                 gate=ticket['gate'],
+                                 resource=ticket['resource'])
 
             if self.dal.session.query(Tickets) \
                 .filter_by(origin_airport=ticket_obj.origin_airport,
                            destination_airport=ticket_obj.destination_airport,
                            date=ticket_obj.date,
                            price=ticket_obj.price,
-                           number_of_changes=ticket_obj.number_of_changes).count() < 1:
+                           number_of_changes=ticket_obj.number_of_changes,
+                           resource=ticket_obj.resource).count() < 1:
                 try:
                     self.dal.session.add(ticket_obj)
                 except IntegrityError:
@@ -92,3 +95,28 @@ class DBConnector:
             return True
         except Exception:
             return False
+
+    def add_new_airport(self, new_airports):
+        """
+         Add new airport code <-> city name map to DB
+        :param new_airports: dictionary like {'airport_code': 'city_name'}
+        :return:
+        """
+
+        for airport in new_airports:
+            airport_obj = Airports()
+            airport_obj.short_code = airport
+            airport_obj.city_name = new_airports[airport]
+
+            if self.dal.session.query(Airports) \
+                    .filter_by(city_name=airport_obj.city_name,
+                               short_code=airport_obj.short_code).count() < 1:
+                try:
+                    self.dal.session.add(airport_obj)
+                except IntegrityError:
+                    continue
+                except InvalidRequestError:  # UNIQUE constraint failed
+                    continue
+                else:
+                    self.dal.session.commit()
+        return True

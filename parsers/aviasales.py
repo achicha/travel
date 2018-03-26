@@ -43,7 +43,8 @@ class AviaSalesParser(BaseParser):
                                    key=lambda x: x['value'])
         # add airports
         [i.update({'origin_airport': origin_airport,
-                   'destination_airport': destination_airport}) for i in filtered_by_price]
+                   'destination_airport': destination_airport,
+                   'resource': 'aviasales'}) for i in filtered_by_price]
         return filtered_by_price
         # all
         # return sorted(resp['prices'], key=lambda x: x['value'])

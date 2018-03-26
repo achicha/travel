@@ -15,19 +15,28 @@ class Tickets(CBase):
                                        name='unique_flight'),)
 
     id = Column(Integer(), primary_key=True)
-    origin_airport = Column(String(255), nullable=False)
-    destination_airport = Column(String(255), nullable=False)
+    origin_airport = Column(String(255),  ForeignKey('airports.city_name'), nullable=False)
+    destination_airport = Column(String(255),  ForeignKey('airports.city_name'), nullable=False)
     date = Column(DateTime(), nullable=False)
     price = Column(Integer(), nullable=False)
     number_of_changes = Column(Integer(), default=0)
-    gate = Column(String(255))  # who selling the ticket
+    gate = Column(String(255))      # who selling the ticket
+    resource = Column(String(255))  # web-page where it was downloaded from
 
     update_time = Column(DateTime(), nullable=False, default=dt.now, onupdate=dt.now)
     sent_to_telegram = Column(DateTime())
 
     def __str__(self):
-        return "{}| from {} -> to {} ={}rub".format(dt.strftime(self.date, '%d-%m-%Y'),
+        return "{}| from {} -> to {} ={}rub".format(dt.strftime(self.date, '%d-%m-%y'),
                                                     self.origin_airport,
                                                     self.destination_airport,
                                                     self.price
                                                     )
+
+
+class Airports(CBase):
+    __tablename__ = 'airports'
+
+    id = Column(Integer(), primary_key=True)
+    short_code = Column(String(255), nullable=False)
+    city_name = Column(String(255), nullable=False)

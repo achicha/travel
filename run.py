@@ -4,7 +4,7 @@ import click
 from parsers.aviasales import AviaSalesParser
 from parsers.msg_sender import send
 from database.views import DBConnector
-from settings import DATABASE_URL, HEROKU_URL, TRAVEL_ROUTE, CHAT_ID
+from settings import DATABASE_URL, HEROKU_URL, TRAVEL_ROUTE, CHAT_ID, AIRPORT_CITY_MAP
 
 
 # set default help options
@@ -14,8 +14,10 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.option('--debug', '-d', type=bool, is_flag=True,
               help='debug mode on, for testing purpose only ')
+@click.option('--add', '-a', type=bool, is_flag=True,
+              help='add airports mapping from config')
 @click.pass_context
-def cli(ctx, debug):
+def cli(ctx, debug, add):
     """Travel parsers. examples: \n
     aviasales -from LWN -to MOW -s 2018-04-28 -e 2018-05-03 -p 5200 \n
     """
@@ -33,6 +35,12 @@ def cli(ctx, debug):
     tickets_db = DBConnector(DATABASE_URL, echo=False)  # ('sqlite:///:memory:') or DATABASE_URL
     tickets_db.setup()
     print('ticket_db set up successful')
+
+    # add new airports to DB
+    if add:
+        tickets_db.add_new_airport(AIRPORT_CITY_MAP)
+        print('new airports={} added'.format(len(AIRPORT_CITY_MAP)))
+        exit(0)
 
     # share group values between commands
     ctx.obj['DEBUG'] = debug or False

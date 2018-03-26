@@ -12,15 +12,8 @@ HEROKU_URL = env.str('HEROKU_URL')
 TRAVEL_ROUTE = env.str('TRAVEL_ROUTE')
 CHAT_ID = env.int('CHAT_ID')
 
-DESTINATIONS = [
-    {
-        'origin_airport': 'EVN',
-        'destination_airport': 'MOW',
-        'price': 5500
-    },
-    {
-        'origin_airport': 'LWN',
-        'destination_airport': 'MOW',
-        'price': 5500
-    }
-]
+AIRPORT_CITY_MAP = {
+    'MOW': 'Moscow',
+    'LWN': 'Gyumri',
+    'EVN': 'Yerevan'
+}
