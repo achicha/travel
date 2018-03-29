@@ -12,6 +12,10 @@ HEROKU_URL = env.str('HEROKU_URL')
 TRAVEL_ROUTE = env.str('TRAVEL_ROUTE')
 CHAT_ID = env.int('CHAT_ID')
 
+# celery
+BROKER_URL = env.str('BROKER_URL')                          # 'amqp://user:password@127.0.0.1:5672/myvhost'
+CELERY_RESULT_BACKEND = env.str('CELERY_RESULT_BACKEND')    # 'rpc'
+
 AIRPORT_CITY_MAP = {
     'MOW': 'Moscow',
     'LWN': 'Gyumri',
