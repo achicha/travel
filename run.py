@@ -2,6 +2,7 @@ import traceback
 from datetime import datetime as dt, timedelta as td
 import click
 from parsers.aviasales import AviaSalesParser
+from parsers.aviobilet import AviobiletParser
 from parsers.msg_sender import send
 from database.views import DBConnector
 from settings import DATABASE_URL, HEROKU_URL, TRAVEL_ROUTE, CHAT_ID, AIRPORT_CITY_MAP
@@ -103,6 +104,60 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
     #     dt.strftime(dt.utcfromtimestamp(int(dt.now().timestamp())), '%Y-%m-%d %H:%M:%S')
     # ))
     # print('===============================')
+
+
+@cli.command(context_settings=CONTEXT_SETTINGS)
+@click.option('--origin_airport', '-from', type=str, default='MOW',
+              help='airport of departure. example: MOW')
+@click.option('--destination_airport', '-to', type=str, default='LWN',
+              help='airport of arrival. example: LWN')
+@click.option('--start', '-s', type=str, default=dt.now().strftime('%Y-%m-%d'),
+              help='date when your trip will starts')
+@click.option('--end', '-e', type=str, default=(dt.now() + td(6)).strftime('%Y-%m-%d'),
+              help='date when your trip will ends')
+@click.option('--price', '-p', type=int, default=2000, help='maximum ticket price')
+@click.pass_context
+def aviobilet(ctx, origin_airport, destination_airport, start, end, price):
+    """Aviasales parser"""
+
+    # download tickets
+    try:
+        # print('aviasales parser starts')
+        a = AviobiletParser()
+        tickets = a.get_data(origin_airport=origin_airport,
+                             destination_airport=destination_airport,
+                             depart_start=start,
+                             depart_end=end,
+                             price=price)
+        print('collected tickets:', len(tickets))
+
+    except Exception as e:
+        print(e)
+
+    # add tickets to DB
+    if tickets:
+        ctx.obj['DB_instance'].add_tickets(tickets)
+
+    # send new tickets to Telegram channel
+    new_tickets = ctx.obj['DB_instance'].get_new_tickets(price)
+
+    if new_tickets:
+        print('new tickets: {}'.format(len(new_tickets)))
+        try:
+            if ctx.obj['DEBUG']:
+                [print(ticket) for ticket in new_tickets]
+            else:
+                send(url=HEROKU_URL + TRAVEL_ROUTE,
+                     chat_id=CHAT_ID,
+                     msg='\n'.join([str(ticket) for ticket in new_tickets]))
+        except Exception:
+            print('Send to telegram error: \n {}'.format(traceback.format_exc()))
+        else:
+            ctx.obj['DB_instance'].update_telegram_status(new_tickets)
+
+    # exit
+    ctx.obj['DB_instance'].remove_old_tickets()
+    ctx.obj['DB_instance'].teardown()
 
 
 if __name__ == "__main__":

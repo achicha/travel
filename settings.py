@@ -18,6 +18,9 @@ CELERY_RESULT_BACKEND = env.str('CELERY_RESULT_BACKEND')    # 'rpc'
 
 AIRPORT_CITY_MAP = {
     'MOW': 'Moscow',
+    'SVO': 'Sheremetevo',
+    'DME': 'Domodedovo',
     'LWN': 'Gyumri',
-    'EVN': 'Yerevan'
+    'EVN': 'Yerevan',
+    'BOJ': 'Burgas'
 }
