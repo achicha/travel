@@ -1,4 +1,3 @@
-from collections import namedtuple
 from datetime import datetime as dt, timedelta as td
 from parsers.base import BaseParser
 from parsers.msg_sender import requests_retry_session
@@ -44,7 +43,8 @@ class AviaSalesParser(BaseParser):
         # add airports
         [i.update({'origin_airport': origin_airport,
                    'destination_airport': destination_airport,
-                   'resource': 'aviasales'}) for i in filtered_by_price]
+                   'resource': 'aviasales',
+                   'depart_date': dt.strptime(i['depart_date'], '%Y-%m-%d')}) for i in filtered_by_price]
         return filtered_by_price
         # all
         # return sorted(resp['prices'], key=lambda x: x['value'])

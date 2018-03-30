@@ -61,7 +61,7 @@ class AviobiletParser(BaseParser):
                 if 'href' in el.attrib:
                     ticket['link'] = 'https://aviobilet.com' + el.attrib['href']
                 if el.get('class') == 'TicketListPrice_v2':
-                    ticket['price'] = int(''.join(list(el.itertext())[1:-1]).replace(' ', ''))
+                    ticket['value'] = int(''.join(list(el.itertext())[1:-1]).replace(' ', ''))
                 if el.get('class') == 'TicketCityTitle':
                     dest = el.text.strip()
 
@@ -75,6 +75,8 @@ class AviobiletParser(BaseParser):
                     time = dt.strptime(''.join(list(el.itertext())[1:]).split('-')[0].strip(), '%d.%m.%Y / %H:%M')
                     ticket['depart_date'] = time
                     ticket['resource'] = 'aviobilet'
+                    ticket['number_of_changes'] = 0
+                    ticket['gate'] = 'non'
 
             # add ticket
             if ticket:

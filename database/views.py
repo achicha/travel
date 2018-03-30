@@ -56,7 +56,7 @@ class DBConnector:
         for ticket in tickets:
             ticket_obj = Tickets(origin_airport=ticket['origin_airport'],
                                  destination_airport=ticket['destination_airport'],
-                                 date=dt.strptime(ticket['depart_date'], '%Y-%m-%d'),
+                                 date=ticket['depart_date'],
                                  price=ticket['value'],
                                  number_of_changes=ticket['number_of_changes'],
                                  gate=ticket['gate'],
