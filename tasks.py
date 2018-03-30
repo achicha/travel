@@ -15,5 +15,5 @@ def aviasales_parser(from_='LWN', to='MOW',
     command = 'python ' + os.path.join(path, 'run.py') + \
               ' aviasales -from {} -to {} -s {} -e {} -p {}'.format(from_, to, start, end, price)
     #r = os.system(command)
-    result = subprocess.check_output([command], stderr=subprocess.STDOUT)
+    result = subprocess.check_output(command.split(), stderr=subprocess.STDOUT)
     return result
