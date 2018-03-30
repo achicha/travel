@@ -19,5 +19,16 @@ def aviasales_parser(from_='LWN', to='MOW',
     return result.decode()
 
 
+@celery.task
+def aviobilet_parser(from_='MOW', to='BOJ',
+                     start='2018-04-28', end='2018-05-03', price='2000'):
+
+    command = 'python ' + os.path.join(path, 'run.py') + \
+              ' aviobilet -from {} -to {} -s {} -e {} -p {}'.format(from_, to, start, end, price)
+    #r = os.system(command)
+    result = subprocess.check_output(command.split(), stderr=subprocess.STDOUT)
+    return result.decode()
+
+
 if __name__ == '__main__':
     aviasales_parser()
