@@ -21,9 +21,9 @@ def cli(ctx, debug, add):
     """Travel parsers. examples: \n
     aviasales -from LWN -to MOW -s 2018-04-28 -e 2018-05-03 -p 5200 \n
     """
-    print('start at {} UTC'.format(
-        dt.strftime(dt.utcfromtimestamp(int(dt.now().timestamp())), '%Y-%m-%d %H:%M:%S')
-    ))
+    # print('start at {} UTC'.format(
+    #     dt.strftime(dt.utcfromtimestamp(int(dt.now().timestamp())), '%Y-%m-%d %H:%M:%S')
+    # ))
 
     # debug mode
     if debug:
@@ -34,7 +34,7 @@ def cli(ctx, debug, add):
     # init parsers/db
     tickets_db = DBConnector(DATABASE_URL, echo=False)  # ('sqlite:///:memory:') or DATABASE_URL
     tickets_db.setup()
-    print('ticket_db set up successful')
+    # print('ticket_db set up successful')
 
     # add new airports to DB
     if add:
@@ -63,7 +63,7 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
 
     # download tickets
     try:
-        print('aviasales parser starts')
+        # print('aviasales parser starts')
         a = AviaSalesParser()
         tickets = a.get_data(origin_airport=origin_airport,
                              destination_airport=destination_airport,
@@ -83,6 +83,7 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
     new_tickets = ctx.obj['DB_instance'].get_new_tickets(price)
 
     if new_tickets:
+        print('new tickets: {}'.format(len(new_tickets)))
         try:
             if ctx.obj['DEBUG']:
                 [print(ticket) for ticket in new_tickets]
@@ -98,10 +99,10 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
     # exit
     ctx.obj['DB_instance'].remove_old_tickets()
     ctx.obj['DB_instance'].teardown()
-    print('finish at {} UTC'.format(
-        dt.strftime(dt.utcfromtimestamp(int(dt.now().timestamp())), '%Y-%m-%d %H:%M:%S')
-    ))
-    print('===============================')
+    # print('finish at {} UTC'.format(
+    #     dt.strftime(dt.utcfromtimestamp(int(dt.now().timestamp())), '%Y-%m-%d %H:%M:%S')
+    # ))
+    # print('===============================')
 
 
 if __name__ == "__main__":

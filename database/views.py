@@ -78,7 +78,8 @@ class DBConnector:
                 else:
                     self.dal.session.commit()
             else:
-                print('ticket already exists')
+                # print('ticket already exists')
+                pass
         return True
 
     def remove_old_tickets(self, days=15):

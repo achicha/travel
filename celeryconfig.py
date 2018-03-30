@@ -3,9 +3,9 @@ from settings import BROKER_URL, CELERY_RESULT_BACKEND
 
 
 CELERYBEAT_SCHEDULE = {
-    'every-hour': {
-        'task': 'tasks.aviasales_gyumri',
-        'schedule': crontab(minute='*/3'), # (minute=0, hour='8-22'),
-        #'args': 'aviasales -from LWN -to MOW -s 2018-04-28 -e 2018-05-03 -p 10200'
-    },
+    'every-minute': {
+        'task': 'tasks.aviasales_parser',
+        'schedule': crontab(minute='*/15', hour='*,8-22'),  # every 15 minute in working hours
+        'args': ('LWN', 'MOW', '2018-04-28', '2018-05-03', '4000')
+    }
 }
