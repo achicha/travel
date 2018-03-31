@@ -12,6 +12,7 @@ click = "*"
 envparse = "*"
 sqlalchemy = "*"
 "psycopg2" = "*"
+lxml = "*"
 
 
 [dev-packages]
