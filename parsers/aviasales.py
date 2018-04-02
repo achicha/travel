@@ -26,7 +26,7 @@ class AviaSalesParser(BaseParser):
         resp = requests_retry_session().get(url=url, headers=_headers)
         return resp
 
-    def _parse_data(self, response, origin_airport, destination_airport, price):
+    def _parse_data(self, response, origin_airport, destination_airport, depart_start, depart_end, price):
         """
            Get data from response
         :param response: response

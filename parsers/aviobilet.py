@@ -31,7 +31,7 @@ class AviobiletParser(BaseParser):
         resp = requests_retry_session().get(url=url, headers=_headers)
         return resp
 
-    def _parse_data(self, response, origin_airport, destination_airport, price=None):
+    def _parse_data(self, response, origin_airport, destination_airport, depart_start, depart_end, price=None):
         """
            Get data from response
         :param response: response
@@ -78,9 +78,10 @@ class AviobiletParser(BaseParser):
                     ticket['number_of_changes'] = 0
                     ticket['gate'] = 'non'
 
-            # add ticket
-            if ticket:
-                filtered_by_price.append(ticket)
+            # add ticket filtered by price and date range
+            if ticket and ticket['value'] <= price and dt.strptime(depart_start, '%Y-%m-%d') <= \
+                    ticket['depart_date'] <= dt.strptime(depart_end, '%Y-%m-%d'):
+                    filtered_by_price.append(ticket)
             airport = ''
 
         return filtered_by_price

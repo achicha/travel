@@ -109,8 +109,8 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
 @cli.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--origin_airport', '-from', type=str, default='MOW',
               help='airport of departure. example: MOW')
-@click.option('--destination_airport', '-to', type=str, default='LWN',
-              help='airport of arrival. example: LWN')
+@click.option('--destination_airport', '-to', type=str, default='BOJ',
+              help='airport of arrival. example: BOJ')
 @click.option('--start', '-s', type=str, default=dt.now().strftime('%Y-%m-%d'),
               help='date when your trip will starts')
 @click.option('--end', '-e', type=str, default=(dt.now() + td(6)).strftime('%Y-%m-%d'),

@@ -37,7 +37,7 @@ class BaseParser(metaclass=ABCMeta):
         url = self._create_url(origin_airport, destination_airport, depart_start, depart_end)
         resp = self._fetch(url)
         if resp.status_code == 200:
-            data = self._parse_data(resp, origin_airport, destination_airport, price)
+            data = self._parse_data(resp, origin_airport, destination_airport, depart_start, depart_end, price)
             return data
         else:
             return 'reason: {}, code: {}'.format(resp.reason, resp.status_code)
