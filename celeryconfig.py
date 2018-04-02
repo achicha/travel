@@ -11,7 +11,7 @@ CELERYBEAT_SCHEDULE = {
     'aviobilet_burgas': {
         'task': 'tasks.aviobilet_parser',
         'schedule': crontab(minute='*/15'),  # every 15 minute in working hours
-        'args': ('MOW', 'BOJ', '2018-04-28', '2018-05-03', '2000')
+        'args': ('MOW', 'BOJ', '2018-07-15', '2018-08-28', '1500')
     }
 
 
