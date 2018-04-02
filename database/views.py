@@ -17,13 +17,15 @@ class DBConnector:
     def teardown(self):
         self.dal.session.close()
 
-    def get_new_tickets(self, min_price):
+    def get_new_tickets(self, min_price, resource):
         """
             Return newly added tickets from Database.
         :return: newly added ticket from DB.
         """
         return self.dal.session.query(Tickets) \
-            .filter(and_(Tickets.sent_to_telegram == None, Tickets.price < min_price)).order_by(Tickets.price).all()
+            .filter(and_(Tickets.sent_to_telegram == None,
+                         Tickets.price < min_price,
+                         Tickets.resource == resource)).order_by(Tickets.price).all()
 
     def update_telegram_status(self, tickets):
         """

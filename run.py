@@ -81,7 +81,7 @@ def aviasales(ctx, origin_airport, destination_airport, start, end, price):
         ctx.obj['DB_instance'].add_tickets(tickets)
 
     # send new tickets to Telegram channel
-    new_tickets = ctx.obj['DB_instance'].get_new_tickets(price)
+    new_tickets = ctx.obj['DB_instance'].get_new_tickets(price, 'aviasales')
 
     if new_tickets:
         print('new tickets: {}'.format(len(new_tickets)))
@@ -139,7 +139,7 @@ def aviobilet(ctx, origin_airport, destination_airport, start, end, price):
         ctx.obj['DB_instance'].add_tickets(tickets)
 
     # send new tickets to Telegram channel
-    new_tickets = ctx.obj['DB_instance'].get_new_tickets(price)
+    new_tickets = ctx.obj['DB_instance'].get_new_tickets(price, 'aviobilet')
 
     if new_tickets:
         print('new tickets: {}'.format(len(new_tickets)))
