@@ -40,10 +40,12 @@ class AviaSalesParser(BaseParser):
         # filtered out by price
         filtered_by_price = sorted([i for i in resp['prices'] if int(i['value']) <= price],
                                    key=lambda x: x['value'])
-        # add airports
+        # add airports, resource and link
         [i.update({'origin_airport': origin_airport,
                    'destination_airport': destination_airport,
                    'resource': 'aviasales',
+                   'link': 'https://www.aviasales.ru/search/' + origin_airport +
+                           dt.strftime(dt.strptime(i['depart_date'], '%Y-%m-%d'), '%d%m') + destination_airport + '1',
                    'depart_date': dt.strptime(i['depart_date'], '%Y-%m-%d')}) for i in filtered_by_price]
         return filtered_by_price
         # all

@@ -62,7 +62,8 @@ class DBConnector:
                                  price=ticket['value'],
                                  number_of_changes=ticket['number_of_changes'],
                                  gate=ticket['gate'],
-                                 resource=ticket['resource'])
+                                 resource=ticket['resource'],
+                                 link=ticket['link'])
 
             if self.dal.session.query(Tickets) \
                 .filter_by(origin_airport=ticket_obj.origin_airport,
